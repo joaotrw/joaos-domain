@@ -4,7 +4,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
-app.use(cors()); // This allows your Amplify site to talk to this server
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -286,8 +285,5 @@ app.patch('/api/goals/:id', async (req, res) => {
   }
 });
 
-// 4. START SERVER
-app.listen(PORT, () => {
-    console.log(`Server is live at http://localhost:${PORT}`);
-});
+
 
