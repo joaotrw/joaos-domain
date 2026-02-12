@@ -5,8 +5,11 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Use AWS port or 3000 locally
-
+const PORT = process.env.PORT || 3000;
+// We add '0.0.0.0' so AWS can reach the container
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+});
 app.use(cors());
 app.use(express.json());
 
