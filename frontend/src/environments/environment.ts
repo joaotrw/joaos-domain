@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-api-on-aws.com/api' // We will get this URL once we deploy the backend
+  apiUrl: 'https://mmkdw7ugbe.us-east-1.awsapprunner.com' // <-- Paste your URL here
 };
