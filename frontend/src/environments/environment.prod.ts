@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-future-aws-url.com/api' // We will update this later
+  apiUrl: 'https://mmkdw7ugbe.us-east-1.awsapprunner.com/' // <-- Paste your URL here
 };
