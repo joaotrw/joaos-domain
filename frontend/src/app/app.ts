@@ -59,12 +59,15 @@ ngOnInit() {
 // Create a master sync function
 syncData() {
   console.log('Initiating Master Sync...');
-  this.checkServer();
-  this.loadUsers();
-  this.loadProjects();
-  this.loadTrades();
-  this.loadFinance();
-  this.loadGoals(); // <--- ADD THIS LINE
+  setTimeout(() => {
+    this.checkServer();
+    this.loadUsers();
+    this.loadProjects();
+    this.loadTrades();
+    this.loadFinance(); // Loads Expenses
+    this.loadIncome();  // <--- ADD THIS LINE HERE
+    this.loadGoals();
+  }, 100);
 }
 
 userRole: string = 'User';
@@ -76,14 +79,22 @@ login(name: string, pass: string) {
     .subscribe({
       next: (res) => {
         if (res.success) {
-          this.isLoggedIn = true;
-          this.userRole = res.role;
+          // 1. Save data to localStorage first
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('userRole', res.role);
+          localStorage.setItem('currentUser', name); // Make sure you save the username too!
+
+          // 2. Update the UI state
+          this.isLoggedIn = true;
+          this.userRole = res.role;
           
-          // SYNC DATA IMMEDIATELY ON LOGIN
+          // 3. TRIGGER DATA IMMEDIATELY
+          console.log('Login successful, fetching data...');
           this.syncData(); 
         }
+      },
+      error: (err) => {
+        this.loginError = "Invalid username or password";
       }
     });
 }
@@ -189,13 +200,20 @@ refreshDashboard() {
 // Function to switch pages
 setView(view: 'home' | 'crypto' | 'finance') {
   this.currentView = view;
-  if (view === 'crypto') { this.loadTrades(); }
-  if (view === 'finance') { this.loadFinance(); 
-    this.loadFinance(); // Loads Expenses
-    this.loadIncome();  // Loads Income
-  } // New call
-    this.cryptoSubView = 'log'; // Default to the logger/history
+  
+  if (view === 'crypto') { 
+    this.loadTrades(); 
   }
+  
+  if (view === 'finance') { 
+    // Force a fresh fetch every time the tab is clicked
+    this.loadFinance(); 
+    this.loadIncome();
+    this.loadGoals();
+  }
+  
+  this.cryptoSubView = 'log'; 
+}
 
 
 loadTrades() {
@@ -299,7 +317,13 @@ get totalNetBalance(): number {
 
 loadFinance() {
   this.http.get<any[]>(`${environment.apiUrl}/finance`)
-    .subscribe(data => this.allFinance = data);
+    .subscribe({
+      next: (data) => {
+        this.allFinance = data;
+        console.log('Finance data loaded:', data);
+      },
+      error: (err) => console.error("Finance load failed", err)
+    });
 }
 
 addFinanceTransaction(data: any) {

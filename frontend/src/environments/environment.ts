@@ -1,5 +1,4 @@
-// environment.prod.ts
 export const environment = {
-  production: true,
-  apiUrl: 'https://mmkdw7ugbe.us-east-1.awsapprunner.com/api' // Added /api here
+  production: false,
+  apiUrl: 'http://localhost:3000/api' // Make sure /api is here too!
 };
