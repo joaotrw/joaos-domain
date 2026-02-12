@@ -1,0 +1,71 @@
+<div class="main-wrapper">
+  @if (!isLoggedIn) {
+    <app-login 
+      [loginError]="loginError" 
+      (loginEvent)="login($event.u, $event.p)"
+      (registerEvent)="register($event.u, $event.p)">
+    </app-login>
+  } 
+
+  @else {
+    <div class="dashboard fade-in">
+      <nav class="sidebar">
+        <div class="logo">JD</div>
+        <ul>
+          <li [class.active]="currentView === 'home'" (click)="setView('home')">Home</li>
+          <li [class.active]="currentView === 'crypto'" (click)="setView('crypto')">Crypto</li>
+          <li [class.active]="currentView === 'finance'" (click)="setView('finance')">Finance</li>
+          <li (click)="logout()" class="logout-link">Logout</li>
+        </ul>
+      </nav>
+
+      <main class="content">
+        @if (currentView === 'home') {
+          <app-project-tracker 
+            [allProjects]="allProjects" 
+            [userRole]="userRole"
+            [allUsers]="allUsers"
+            [serverMessage]="serverMessage"
+            (addProjectEvent)="addProject($event.title, $event.desc)"
+            (deleteProjectEvent)="deleteProject($event)"
+            (toggleStatusEvent)="toggleStatus($event)"
+            (addTaskEvent)="addTask($event.id, $event.text)"
+            (refreshEvent)="refreshDashboard()"
+            (checkServerEvent)="checkServer()">
+          </app-project-tracker>
+        }
+
+        @if (currentView === 'crypto') {
+          <app-crypto-hub 
+            [allTrades]="allTrades"
+            [totalTrades]="totalTrades"
+            [winRate]="winRate"
+            [totalNetProfit]="totalNetProfit"
+            (tradeAddedEvent)="addTrade($event)">
+          </app-crypto-hub>
+        }
+
+        @if (currentView === 'finance') {
+          <app-finance-manager 
+            [allFinance]="allFinance" 
+            [allIncome]="allIncome" 
+            [goals]="goals" 
+            [today]="today"
+            [totalIncome]="totalIncome" 
+            [totalExpenses]="totalExpenses" 
+            [totalNetBalance]="totalNetBalance"
+            [capitalOneBalance]="capitalOneBalance" 
+            [santanderBalance]="santanderBalance"
+            (addExpenseEvent)="addFinanceTransaction($event)" 
+            (deleteExpenseEvent)="deleteFinanceTransaction($event)"
+            (addIncomeEvent)="addIncome($event)" 
+            (deleteIncomeEvent)="deleteIncome($event)"
+            (addGoalEvent)="addGoal($event.name, $event.target, $event.date)"
+            (updateGoalEvent)="updateGoalProgress($event.id, $event.amount)"
+            (deleteGoalEvent)="deleteGoal($event)">
+          </app-finance-manager>
+        }
+      </main>
+    </div>
+  }
+</div>

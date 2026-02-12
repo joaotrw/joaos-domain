@@ -1,0 +1,103 @@
+<div class="fade-in">
+  <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div>
+      <h1 style="margin: 0;">Welcome, Joao</h1>
+      <p style="color: #888; margin: 5px 0 0 0;">Systems Overview</p>
+    </div>
+    <button class="refresh-btn" (click)="onRefresh()">🔄 Refresh Dashboard</button>
+  </header>
+
+  <div class="home-grid">
+    
+    <section class="card">
+      <h3 style="margin-bottom: 15px; color: #007bff;">Server Connection</h3>
+      <div class="status-wrapper" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <span class="dot" [class.online]="serverMessage.includes('Connected')"></span>
+        <p style="margin: 0;">{{ serverMessage }}</p>
+      </div>
+      <button class="primary-btn" style="width: 100%;" (click)="onCheckServer()">Ping Server</button>
+    </section>
+
+    <section class="card">
+      <h3 style="margin-bottom: 15px; color: #007bff;">Registered Residents</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th style="text-align: right;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of allUsers; track user._id) {
+            <tr>
+              <td>{{ user.username }}</td>
+              <td><span class="badge" style="background: #333; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">{{ user.role }}</span></td>
+              <td style="text-align: right; color: #28a745; font-size: 0.9rem;">● Active</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card full-width">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0;">🚀 Project Tracker</h2>
+        @if (userRole === 'Admin') {
+          <div class="add-project-form" style="display: flex; gap: 10px;">
+            <input type="text" #pTitle placeholder="Project Title" style="padding: 8px;">
+            <input type="text" #pDesc placeholder="Description" style="padding: 8px;">
+            <button class="primary-btn" (click)="onAddProject(pTitle.value, pDesc.value); pTitle.value=''; pDesc.value=''">+ Add</button>
+          </div>
+        }
+      </div>
+
+      <div class="project-grid">
+        @for (project of allProjects; track project._id) {
+          <div class="project-item">
+            <div class="project-info">
+              <h3 (click)="selectProject(project)" style="cursor:pointer; color:#007bff; margin-bottom: 8px;">{{ project.title }}</h3>
+              <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 12px;">{{ project.description }}</p>
+              <span class="status-tag" 
+                    [style.cursor]="userRole === 'Admin' ? 'pointer' : 'default'" 
+                    (click)="userRole === 'Admin' && onToggleStatus(project._id)">
+                {{ project.status }}
+              </span>
+            </div>
+            @if (userRole === 'Admin') {
+              <button class="delete-btn-small" (click)="onDeleteProject(project._id)">×</button>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>
+
+@if (selectedProject) {
+  <div class="project-detail-overlay">
+    <div class="project-detail-card">
+      <button class="close-btn" (click)="selectedProject = null">×</button>
+      <h2 style="color: #007bff;">{{ selectedProject.title }}</h2>
+      <p style="color: #ccc;">{{ selectedProject.description }}</p>
+      <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+      
+      <h3>Tasks</h3>
+      <ul class="task-list" style="list-style: none; padding: 0;">
+        @for (task of selectedProject.tasks; track $index) {
+          <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: #2a2a2a; padding: 10px; border-radius: 6px;">
+            <input type="checkbox" [checked]="task.completed" style="width: auto; margin: 0;"> 
+            <span>{{ task.text }}</span>
+          </li>
+        } @empty {
+          <li style="color: #666; font-style: italic;">No tasks added yet.</li>
+        }
+      </ul>
+
+      <div class="add-task" style="display: flex; gap: 10px; margin-top: 20px;">
+        <input type="text" #taskInput placeholder="New task..." style="flex: 1;">
+        <button class="primary-btn" (click)="onAddTask(selectedProject._id, taskInput.value); taskInput.value=''">Add</button>
+      </div>
+    </div>
+  </div>
+}

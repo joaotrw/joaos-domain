@@ -1,0 +1,31 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>Joao's Domain</h1>
+    <p>{{ isRegisterMode ? 'Secure Registration' : 'Restricted Access' }}</p>
+
+    <div class="input-group">
+      <input type="text" #uInput placeholder="Username">
+      <input type="password" #pInput placeholder="Password">
+
+      @if (isRegisterMode) {
+        <button class="primary-btn" (click)="onRegister(uInput.value, pInput.value)">
+          Create Secured Account
+        </button>
+        <p class="toggle-link" (click)="isRegisterMode = false">
+          Already have an account? Log in
+        </p>
+      } @else {
+        <button class="primary-btn" (click)="onLogin(uInput.value, pInput.value)">
+          Enter Domain
+        </button>
+        <p class="toggle-link" (click)="isRegisterMode = true">
+          Need an account? Sign up
+        </p>
+      }
+    </div>
+
+    @if (loginError) {
+      <p class="error-msg">{{ loginError }}</p>
+    }
+  </div>
+</div>

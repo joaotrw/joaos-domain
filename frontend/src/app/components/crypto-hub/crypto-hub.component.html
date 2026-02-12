@@ -1,0 +1,104 @@
+<div class="crypto-container fade-in">
+  <header>
+    <h1 style="font-size: 2rem; letter-spacing: -1px;">💰 Crypto Trading Hub</h1>
+    <div class="sub-nav">
+      <button [class.active-tab]="cryptoSubView === 'log'" (click)="cryptoSubView = 'log'">Trade Logger</button>
+      <button [class.active-tab]="cryptoSubView === 'stats'" (click)="cryptoSubView = 'stats'">Analytics</button>
+    </div>
+  </header>
+
+  @if (cryptoSubView === 'log') {
+    <div class="fade-in">
+      <section class="card trade-form-card">
+        <h3 style="color: #007bff;">Log New Professional Trade</h3>
+        <div class="trade-form-grid">
+          <div class="form-group"><label>Symbol</label><input type="text" #tSymbol placeholder="BTC/USDT"></div>
+          <div class="form-group"><label>Platform</label>
+            <select #tPlatform><option value="GMX">GMX</option><option value="Kraken">Kraken</option><option value="Binance">Binance</option></select>
+          </div>
+          <div class="form-group"><label>Direction</label>
+            <select #tDirection><option value="Long">Long</option><option value="Short">Short</option></select>
+          </div>
+          <div class="form-group"><label>Order Type</label>
+            <select #tOrderType><option value="Limit">Limit</option><option value="Market">Market</option></select>
+          </div>
+          <div class="form-group"><label>Entry Date</label><input type="date" #tEntryDate></div>
+          <div class="form-group"><label>Entry Price</label><input type="number" #tEntryPrice step="0.000001"></div>
+          <div class="form-group"><label>Exit Price</label><input type="number" #tExitPrice step="0.000001"></div>
+          <div class="form-group"><label>R Multiple</label><input type="number" #tRMult step="0.01"></div>
+          <div class="form-group"><label>Strategy</label>
+            <select #tStrategy><option value="System 1">System 1</option><option value="System 2">System 2</option><option value="System 3">System 3</option></select>
+          </div>
+          <div class="form-group"><label>Realised Loss</label><input type="number" #tRealLoss></div>
+          <div class="form-group"><label>Realised Gains</label><input type="number" #tRealGain></div>
+          <div class="form-group" style="display: flex; align-items: center; gap: 10px; padding-top: 20px;">
+            <input type="checkbox" #tPurple style="width: 18px; height: 18px;">
+            <label>Purple Belt?</label>
+          </div>
+        </div>
+        
+        <button class="primary-btn submit-trade" (click)="onLogTrade({
+          entryDate: tEntryDate.value, symbol: tSymbol.value, direction: tDirection.value,
+          entryPrice: tEntryPrice.value, strategy: tStrategy.value,
+          rMultiple: tRMult.value, isPurpleBelt: tPurple.checked, platform: tPlatform.value,
+          entryOrderType: tOrderType.value, exitPrice: tExitPrice.value,
+          realisedLoss: tRealLoss.value, realisedGains: tRealGain.value
+        })">Log Professional Trade</button>
+      </section>
+
+      <section class="card trade-history-card">
+        <h3>Trade History</h3>
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Asset</th><th>Action</th><th>Price</th><th>Strategy</th><th style="text-align: right;">Result</th></tr>
+          </thead>
+          <tbody>
+  @for (trade of allTrades; track trade._id) {
+    <tr>
+      <td style="color: #666;">{{ trade.date | date:'shortDate' }}</td>
+      
+      <td><strong style="color: #fff;">{{ trade.asset | uppercase }}</strong></td>
+      
+      <td>
+        <span [style.color]="trade.action === 'Long' ? '#00c851' : '#ff4444'" style="font-weight: 600; font-size: 0.8rem;">
+          {{ trade.action | uppercase }}
+        </span>
+      </td>
+      
+      <td>${{ trade.price | number:'1.2-2' }}</td>
+      <td><span style="background: #222; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">{{ trade.strategy }}</span></td>
+      <td style="text-align: right;">
+        @if (trade.realisedGains > 0) { <span class="profit">+${{ trade.realisedGains | number:'1.2-2' }}</span> }
+        @else if (trade.realisedLoss > 0) { <span class="loss">-${{ trade.realisedLoss | number:'1.2-2' }}</span> }
+        @else { <span style="color: #444;">$0.00</span> }
+      </td>
+    </tr>
+  }
+</tbody>
+        </table>
+      </section>
+    </div>
+  }
+
+  @if (cryptoSubView === 'stats') {
+    <div class="stats-container fade-in" style="margin-top: 25px;">
+      <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <div class="card stat-box" style="text-align: center; padding: 30px;">
+          <label style="color: #666; text-transform: uppercase; font-size: 0.8rem;">Total Trades</label>
+          <p style="font-size: 2.5rem; font-weight: bold; margin-top: 10px;">{{ totalTrades }}</p>
+        </div>
+        <div class="card stat-box" style="text-align: center; padding: 30px;">
+          <label style="color: #666; text-transform: uppercase; font-size: 0.8rem;">Win Rate</label>
+          <p style="font-size: 2.5rem; font-weight: bold; margin-top: 10px; color: #007bff;">{{ winRate | number:'1.1-1' }}%</p>
+        </div>
+        <div class="card stat-box" style="text-align: center; padding: 30px;">
+          <label style="color: #666; text-transform: uppercase; font-size: 0.8rem;">Net P&L</label>
+          <p style="font-size: 2.5rem; font-weight: bold; margin-top: 10px;" 
+             [style.color]="totalNetProfit >= 0 ? '#00c851' : '#ff4444'">
+             ${{ totalNetProfit | number:'1.2-2' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+</div>
