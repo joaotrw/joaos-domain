@@ -37,8 +37,7 @@ export class AppComponent implements OnInit {
 allTrades: any[] = [];
 cryptoSubView: 'log' | 'stats' = 'log';
 allFinance: any[] = [];
-@ViewChild('fAmount') amountInput!: ElementRef;
-@ViewChild('fDesc') descInput!: ElementRef;
+@ViewChild('financeRef') financeComponent!: FinanceManagerComponent;
 incomeSubView: 'expenses' | 'income' = 'expenses';
 allIncome: any[] = [];
 goals: any[] = [];
@@ -327,12 +326,13 @@ loadFinance() {
 }
 
 addFinanceTransaction(data: any) {
-  // 1. Validate data before sending
+  // 1. Keep your safety checks!
   if(!data.amount || !data.date) {
     alert("Please enter a date and amount");
     return;
   }
 
+  // 2. Ensure data types are correct before sending to AWS
   const finalData = {
     ...data,
     amount: parseFloat(data.amount),
@@ -341,14 +341,19 @@ addFinanceTransaction(data: any) {
 
   this.http.post(`${environment.apiUrl}/finance`, finalData).subscribe({
     next: (res) => {
-      console.log('Server Response:', res);
-      this.loadFinance(); // Refresh the array
+      console.log('Transaction Added:', res);
       
-      // 2. Clear inputs safely after we know the server got the data
-      if (this.amountInput) this.amountInput.nativeElement.value = '';
-      if (this.descInput) this.descInput.nativeElement.value = '';
+      // 3. Refresh the table data
+      this.loadFinance(); 
+      
+      // 4. Trigger the reset inside the child component
+      if (this.financeComponent) {
+        this.financeComponent.resetForm();
+      }
+      
+      console.log('UI Refreshed and Child Form Reset');
     },
-    error: (err) => console.error('Add failed', err)
+    error: (err) => alert('Failed to add transaction. Check your connection.')
   });
 }
 
@@ -356,10 +361,11 @@ deleteFinanceTransaction(id: string) {
   if (confirm('Permanently delete this transaction?')) {
     this.http.delete(`${environment.apiUrl}/finance/${id}`).subscribe({
       next: () => {
-        this.loadFinance(); // <--- REFRESHES LIST
-        console.log('Transaction deleted and list refreshed');
+        // REFRESH the list so the deleted item disappears
+        this.loadFinance(); 
+        console.log('Transaction removed and table updated');
       },
-      error: (err) => alert("Delete failed. Check server connection.")
+      error: (err) => alert("Delete failed.")
     });
   }
 }
@@ -376,8 +382,12 @@ addIncome(data: any) {
     createdBy: localStorage.getItem('currentUser') || 'Joao'
   };
 
-  this.http.post(`${environment.apiUrl}/income`, finalData).subscribe(() => {
-    this.loadIncome();
+  this.http.post(`${environment.apiUrl}/income`, finalData).subscribe({
+    next: () => {
+      this.loadIncome(); // <--- REFRESH
+      alert('Income added!');
+      // If you have @ViewChild for income inputs, clear them here too
+    }
   });
 }
 

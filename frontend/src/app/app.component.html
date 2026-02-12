@@ -47,6 +47,7 @@
 
         @if (currentView === 'finance') {
           <app-finance-manager 
+            #financeRef
             [allFinance]="allFinance" 
             [allIncome]="allIncome" 
             [goals]="goals" 

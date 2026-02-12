@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+// 1. Added ViewChild, ElementRef, and salt-to-taste imports
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FinancialGoalsComponent } from '../financial-goals/financial-goals.component';
 
@@ -30,7 +31,17 @@ export class FinanceManagerComponent {
   @Output() updateGoalEvent = new EventEmitter<any>();
   @Output() deleteGoalEvent = new EventEmitter<any>();
 
+  // 2. These are now correctly inside the class
+  @ViewChild('fAmount') amountInput!: ElementRef;
+  @ViewChild('fDesc') descInput!: ElementRef;
+
   incomeSubView: 'expenses' | 'income' = 'expenses';
+
+  // 3. resetForm is now a method of the class
+  resetForm() {
+    if (this.amountInput) this.amountInput.nativeElement.value = '';
+    if (this.descInput) this.descInput.nativeElement.value = '';
+  }
 
   // Helper methods to trigger emits
   onAddExpense(data: any) { this.addExpenseEvent.emit(data); }
