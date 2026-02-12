@@ -1,3 +1,5 @@
+// Triggering AWS Build
+
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common'; // 1. Import this!
 import { Component, inject, OnInit, ViewChild, ElementRef } from '@angular/core';
