@@ -71,7 +71,7 @@ userRole: string = 'User';
 
   // 2. AUTHENTICATION LOGIC
 login(name: string, pass: string) {
-  this.http.post<{success: boolean, message: string, role: string}>('${environment.apiUrl}/login', 
+  this.http.post<{success: boolean, message: string, role: string}>(`${environment.apiUrl}/login`, 
     { username: name, password: pass })
     .subscribe({
       next: (res) => {
@@ -96,7 +96,7 @@ login(name: string, pass: string) {
   }
 
 register(name: string, pass: string) {
-  this.http.post<{success: boolean, message: string}>('${environment.apiUrl}/register', 
+  this.http.post<{success: boolean, message: string}>(`${environment.apiUrl}/register`, 
     { username: name, password: pass }) // Send both
     .subscribe({
 
@@ -131,7 +131,7 @@ loadUsers() {
   }
 
   checkServer() {
-    this.http.get<{message: string}>('${environment.apiUrl}/welcome')
+    this.http.get<{message: string}>(`${environment.apiUrl}/welcome`)
       .subscribe({
         next: (data) => this.serverMessage = data.message,
         error: (err) => {
@@ -142,7 +142,7 @@ loadUsers() {
   }
 
   loadProjects() {
-  this.http.get<any[]>('${environment.apiUrl}/projects')
+  this.http.get<any[]>(`${environment.apiUrl}/projects`)
     .subscribe(data => this.allProjects = data);
 }
 
@@ -161,7 +161,7 @@ addTask(projectId: string, taskText: string) {
 
 addProject(title: string, desc: string) {
   const user = localStorage.getItem('currentUser') || 'Unknown';
-  this.http.post('${environment.apiUrl}/projects', { 
+  this.http.post(`${environment.apiUrl}/projects`, { 
     title, 
     description: desc, 
     createdBy: user 
@@ -227,7 +227,7 @@ realisedGains: parseFloat(form.realisedGains) || 0,
     createdBy: localStorage.getItem('currentUser')
   };
 
-  this.http.post('${environment.apiUrl}/trades', finalTradeData)
+  this.http.post(`${environment.apiUrl}/trades`, finalTradeData)
     .subscribe(() => {
       this.loadTrades();
       alert('Trade Logged to Database!');
@@ -298,7 +298,7 @@ get totalNetBalance(): number {
 }
 
 loadFinance() {
-  this.http.get<any[]>('${environment.apiUrl}/finance')
+  this.http.get<any[]>(`${environment.apiUrl}/finance`)
     .subscribe(data => this.allFinance = data);
 }
 
@@ -315,7 +315,7 @@ addFinanceTransaction(data: any) {
     createdBy: localStorage.getItem('currentUser') || 'Joao' 
   };
 
-  this.http.post('${environment.apiUrl}/finance', finalData).subscribe({
+  this.http.post(`${environment.apiUrl}/finance`, finalData).subscribe({
     next: (res) => {
       console.log('Server Response:', res);
       this.loadFinance(); // Refresh the array
@@ -341,7 +341,7 @@ deleteFinanceTransaction(id: string) {
 }
 
 loadIncome() {
-  this.http.get<any[]>('${environment.apiUrl}/income')
+  this.http.get<any[]>(`${environment.apiUrl}/income`)
     .subscribe(data => this.allIncome = data);
 }
 
@@ -352,7 +352,7 @@ addIncome(data: any) {
     createdBy: localStorage.getItem('currentUser') || 'Joao'
   };
 
-  this.http.post('${environment.apiUrl}/income', finalData).subscribe(() => {
+  this.http.post(`${environment.apiUrl}/income`, finalData).subscribe(() => {
     this.loadIncome();
   });
 }
@@ -372,7 +372,7 @@ getPercent(current: number, target: number): number {
 }
 
 loadGoals() {
-  this.http.get<any[]>('${environment.apiUrl}/goals')
+  this.http.get<any[]>(`${environment.apiUrl}/goals`)
     .subscribe(data => this.goals = data);
 }
 
@@ -392,7 +392,7 @@ addGoal(name: string, target: string, deadline: string) { // Change target type 
     createdBy: localStorage.getItem('currentUser') || 'Joao'
   };
 
-  this.http.post('${environment.apiUrl}/goals', newGoal).subscribe(() => {
+  this.http.post(`${environment.apiUrl}/goals`, newGoal).subscribe(() => {
     this.loadGoals(); // Refresh the list
     alert('Goal created!');
   });
