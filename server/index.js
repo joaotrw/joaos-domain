@@ -6,18 +6,31 @@ const bcrypt = require('bcrypt');
 
 const app = express();
 
-// Middleware
+// ==========================================
+// 1. MIDDLEWARE
+// ==========================================
 app.use(cors());
-app.use(express.json());
 
-// 1. DATABASE CONNECTION
+/** * IMPORTANT: We increased the limit to 50mb. 
+ * Base64 image strings are much larger than standard text, 
+ * so this prevents "413 Payload Too Large" errors.
+ */
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// ==========================================
+// 2. DATABASE CONNECTION
+// ==========================================
 const dbURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/joaos_domain';
 
 mongoose.connect(dbURI)
   .then(() => console.log("Cloud Database Connected Successfully"))
   .catch(err => console.error("Database connection error:", err));
 
-// 2. MODELS
+// ==========================================
+// 3. MODELS
+// ==========================================
+
 const User = mongoose.model('User', new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -57,9 +70,9 @@ const Goal = mongoose.model('Goal', new mongoose.Schema({
   deadline: String, createdBy: String
 }));
 
-// Backtest Schema
+// Backtest Schema - Updated with 'image' field
 const backtestSchema = new mongoose.Schema({
-  username: String, // To keep your data separate from others
+  username: String, 
   asset: String,
   date: Date,
   direction: String,
@@ -68,12 +81,15 @@ const backtestSchema = new mongoose.Schema({
   exit: Number,
   returns: Number,
   result: String,
+  image: String, // Stores the Base64 screenshot string
   createdAt: { type: Date, default: Date.now }
 });
 
 const Backtest = mongoose.model('Backtest', backtestSchema);
 
-// 3. ROUTES
+// ==========================================
+// 4. ROUTES
+// ==========================================
 
 // --- Auth Routes ---
 app.post('/api/login', async (req, res) => {
@@ -227,23 +243,31 @@ app.patch('/api/goals/:id', async (req, res) => {
   res.json(updatedGoal);
 });
 
+// --- Backtest Routes ---
+
 // 1. Get all backtests for a user
 app.get('/api/backtests/:username', async (req, res) => {
-  const data = await Backtest.find({ username: req.params.username }).sort({ date: -1 });
-  res.json(data);
+  try {
+    const data = await Backtest.find({ username: req.params.username }).sort({ date: -1 });
+    res.json(data);
+  } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// 2. Save a new backtest
+// 2. Save a new backtest (supports images)
 app.post('/api/backtests', async (req, res) => {
-  const newBt = new Backtest(req.body);
-  await newBt.save();
-  res.json({ success: true, message: "Backtest saved to cloud!" });
+  try {
+    const newBt = new Backtest(req.body);
+    await newBt.save();
+    res.json({ success: true, message: "Backtest saved to cloud!" });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
 // 3. Delete a backtest
 app.delete('/api/backtests/:id', async (req, res) => {
-  await Backtest.findByIdAndDelete(req.params.id);
-  res.json({ success: true });
+  try {
+    await Backtest.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
 // Health Check
@@ -251,7 +275,9 @@ app.get('/api/welcome', (req, res) => {
   res.json({ message: "Connected to Joao's Domain Backend." });
 });
 
-// 4. START SERVER
+// ==========================================
+// 5. START SERVER
+// ==========================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);

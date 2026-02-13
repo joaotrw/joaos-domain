@@ -13,63 +13,82 @@
       <section class="card trade-form-card">
         <h3 style="color: #007bff;">Log New Professional Trade</h3>
         <div class="trade-form-grid">
-          <div class="form-group"><label>Symbol</label><input type="text" #tSymbol placeholder="BTC/USDT"></div>
-          <div class="form-group"><label>Platform</label>
-            <select #tPlatform><option value="GMX">GMX</option><option value="Kraken">Kraken</option><option value="Binance">Binance</option></select>
+          <div class="form-group"><label>Symbol</label><input type="text" #fSymbol placeholder="BTC/USDT"></div>
+          <div class="form-group">
+            <label>Platform</label>
+            <select #fPlatform>
+              <option value="GMX">GMX</option>
+              <option value="Binance">Binance</option>
+              <option value="ByBit">ByBit</option>
+            </select>
           </div>
-          <div class="form-group"><label>Direction</label>
-            <select #tDirection><option value="Long">Long</option><option value="Short">Short</option></select>
-          </div>
-          <div class="form-group"><label>Order Type</label>
-            <select #tOrderType><option value="Limit">Limit</option><option value="Market">Market</option></select>
-          </div>
-          <div class="form-group"><label>Entry Date</label><input type="date" #tEntryDate></div>
-          <div class="form-group"><label>Entry Price</label><input type="number" #tEntryPrice step="0.000001"></div>
-          <div class="form-group"><label>Exit Price</label><input type="number" #tExitPrice step="0.000001"></div>
-          <div class="form-group"><label>R Multiple</label><input type="number" #tRMult step="0.01"></div>
-          <div class="form-group"><label>Strategy</label>
-            <select #tStrategy><option value="System 1">System 1</option><option value="System 2">System 2</option><option value="System 3">System 3</option></select>
-          </div>
-          <div class="form-group"><label>Realised Loss</label><input type="number" #tRealLoss></div>
-          <div class="form-group"><label>Realised Gains</label><input type="number" #tRealGain></div>
-          <div class="form-group" style="display: flex; align-items: center; gap: 10px; padding-top: 20px;">
-            <input type="checkbox" #tPurple style="width: 18px; height: 18px;">
-            <label>Purple Belt?</label>
+          <div class="form-group"><label>Direction</label><select #fAction><option value="Long">Long</option><option value="Short">Short</option></select></div>
+          <div class="form-group"><label>Order Type</label><select #fOrderType><option value="Limit">Limit</option><option value="Market">Market</option></select></div>
+          <div class="form-group"><label>Entry Date</label><input type="date" #fDate></div>
+          <div class="form-group"><label>Entry Time</label><input type="time" #fEntryTime></div>
+          <div class="form-group"><label>Entry Price</label><input type="number" #fPrice step="any"></div>
+          <div class="form-group"><label>Stop Loss</label><input type="number" #fSL step="any"></div>
+          <div class="form-group"><label>Exit Date</label><input type="date" #fExitDate></div>
+          <div class="form-group"><label>Exit Time</label><input type="time" #fExitTime></div>
+          <div class="form-group"><label>Exit Price</label><input type="number" #fExitPrice step="any"></div>
+          <div class="form-group"><label>R Multiple</label><input type="number" #fR step="any"></div>
+          <div class="form-group"><label>Strategy</label><select #fStrategy><option value="System 1">System 1</option><option value="System 2">System 2</option><option value="System 3">System 3</option></select></div>
+          <div class="form-group"><label>Risk Amount ($)</label><input type="number" #fRisk></div>
+          <div class="form-group"><label>Realised Loss</label><input type="number" #fLoss value="0"></div>
+          <div class="form-group"><label>Realised Gains</label><input type="number" #fGains value="0"></div>
+          <div class="form-group" style="grid-column: span 3;"><label>Amount (Position Size)</label><input type="number" #fAmount></div>
+          <div class="form-group" style="display: flex; align-items: center; justify-content: center;">
+            <label style="margin-right: 10px;">PURPLE BELT?</label>
+            <input type="checkbox" #fPurple style="width: 20px; height: 20px;">
           </div>
         </div>
-        
-        <button class="primary-btn submit-trade" (click)="onLogTrade({
-          entryDate: tEntryDate.value, symbol: tSymbol.value, direction: tDirection.value,
-          entryPrice: tEntryPrice.value, strategy: tStrategy.value,
-          rMultiple: tRMult.value, isPurpleBelt: tPurple.checked, platform: tPlatform.value,
-          entryOrderType: tOrderType.value, exitPrice: tExitPrice.value,
-          realisedLoss: tRealLoss.value, realisedGains: tRealGain.value
+        <button class="primary-btn" (click)="submitProfessionalTrade({
+          symbol: fSymbol.value, platform: fPlatform.value, action: fAction.value, orderType: fOrderType.value,
+          date: fDate.value, entryTime: fEntryTime.value, price: fPrice.value, stopLoss: fSL.value,
+          exitDate: fExitDate.value, exitTime: fExitTime.value, exitPrice: fExitPrice.value, rMultiple: fR.value,
+          strategy: fStrategy.value, riskAmount: fRisk.value, realisedLoss: fLoss.value, realisedGains: fGains.value,
+          amount: fAmount.value, purpleBelt: fPurple.checked
         })">Log Professional Trade</button>
       </section>
 
       <section class="card trade-history-card">
-        <h3>Trade History</h3>
+        <h3>Professional Trade History</h3>
         <table>
           <thead>
-            <tr><th>Date</th><th>Asset</th><th>Action</th><th>Price</th><th>Strategy</th><th style="text-align: right;">Result</th></tr>
+            <tr>
+              <th>Date/Time</th>
+              <th>Asset & Platform</th>
+              <th>Action</th>
+              <th>Price (In/Out)</th>
+              <th>Strategy</th>
+              <th>R</th>
+              <th>Result</th>
+              <th>Actions</th>
+            </tr>
           </thead>
           <tbody>
             @for (trade of allTrades; track trade._id) {
               <tr>
-                <td style="color: #666;">{{ trade.date | date:'shortDate' }}</td>
-                <td><strong style="color: #fff;">{{ trade.asset | uppercase }}</strong></td>
+                <td style="font-size: 0.8rem;">
+                  {{ trade.date | date:'MM/dd' }} {{ trade.entryTime }}<br>
+                  <span style="color: #666;">to {{ trade.exitTime }}</span>
+                </td>
                 <td>
-                  <span [style.color]="trade.action === 'Long' ? '#00c851' : '#ff4444'" style="font-weight: 600; font-size: 0.8rem;">
-                    {{ trade.action | uppercase }}
-                  </span>
+                  <strong>{{ trade.asset | uppercase }}</strong><br>
+                  <small style="color: #ffc107;">{{ trade.platform }}</small>
                 </td>
-                <td>${{ trade.price | number:'1.2-2' }}</td>
-                <td><span style="background: #222; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">{{ trade.strategy }}</span></td>
-                <td style="text-align: right;">
-                  @if (trade.realisedGains > 0) { <span class="profit">+${{ trade.realisedGains | number:'1.2-2' }}</span> }
-                  @else if (trade.realisedLoss > 0) { <span class="loss">-${{ trade.realisedLoss | number:'1.2-2' }}</span> }
-                  @else { <span style="color: #444;">$0.00</span> }
+                <td [style.color]="trade.action === 'Long' ? '#00c851' : '#ff4444'"><strong>{{ trade.action }}</strong></td>
+                <td>
+                  ${{ trade.price | number:'1.2-4' }}<br>
+                  <span style="color: #888;">${{ trade.exitPrice | number:'1.2-4' }}</span>
                 </td>
+                <td><span class="strategy-badge">{{ trade.strategy }}</span></td>
+                <td [style.color]="trade.rMultiple > 0 ? '#00c851' : '#ff4444'" style="font-weight: bold;">{{ trade.rMultiple }}R</td>
+                <td [style.color]="(trade.realisedGains - trade.realisedLoss) >= 0 ? '#00c851' : '#ff4444'">
+                  {{ (trade.realisedGains - trade.realisedLoss) | currency }}
+                  @if(trade.purpleBelt) { <span>🟣</span> }
+                </td>
+                <td><button class="delete-btn" (click)="onDeleteTrade(trade._id)">✕</button></td>
               </tr>
             }
           </tbody>
@@ -91,125 +110,91 @@
         </div>
         <div class="card stat-box" style="text-align: center; padding: 30px;">
           <label style="color: #666; text-transform: uppercase; font-size: 0.8rem;">Net P&L</label>
-          <p style="font-size: 2.5rem; font-weight: bold; margin-top: 10px;" 
-             [style.color]="totalNetProfit >= 0 ? '#00c851' : '#ff4444'">
-             ${{ totalNetProfit | number:'1.2-2' }}
-          </p>
+          <p style="font-size: 2.5rem; font-weight: bold; margin-top: 10px;" [style.color]="totalNetProfit >= 0 ? '#00c851' : '#ff4444'">${{ totalNetProfit | number:'1.2-2' }}</p>
         </div>
       </div>
     </div>
   }
 
   @if (cryptoSubView === 'backtest') {
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
-  <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #666;">
-    <label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">BT Sessions</label>
-    <p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0;">{{ btTotalTrades }}</p>
-  </div>
+    <div class="fade-in">
+      <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+        <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #666;"><label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">BT Sessions</label><p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0;">{{ btTotalTrades }}</p></div>
+        <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #00c851;"><label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">BT Win Rate</label><p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #007bff;">{{ btWinRate | number:'1.1-1' }}%</p></div>
+        <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #ffc107;"><label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Avg R-Multiple</label><p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #ffc107;">{{ btAverageR | number:'1.2-2' }}R</p></div>
+      </div>
 
-  <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #00c851;">
-    <label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">BT Win Rate</label>
-    <p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #00c851;">
-      {{ btWinRate | number:'1.1-1' }}%
-    </p>
-  </div>
+      <section class="card trade-form-card">
+        <h3 style="color: #ffc107;">New Backtest Entry</h3>
+        <div class="trade-form-grid">
+          <div class="form-group"><label>Asset</label><input type="text" #bAsset placeholder="BTC/USDT"></div>
+          <div class="form-group"><label>Date & Time</label><input type="datetime-local" #bDateTime></div>
+          <div class="form-group"><label>Entry Price</label><input type="number" #bEntry (input)="0"></div>
+          <div class="form-group"><label>Stop Loss</label><input type="number" #bSL (input)="0"></div>
+          <div class="form-group"><label>Exit Price</label><input type="number" #bExit (input)="0"></div>
+          <div class="form-group"><label>Direction</label><input type="text" [value]="calcDirection(bEntry.value, bSL.value)" readonly style="background: #222; color: #ffc107;"></div>
+          <div class="form-group"><label>Returns (R)</label><input type="text" [value]="calcReturns(bEntry.value, bSL.value, bExit.value) | number:'1.2-2'" readonly style="background: #222; color: #007bff;"></div>
+          <div class="form-group"><label>Win / Loss</label><input type="text" [value]="calcWinLoss(calcReturns(bEntry.value, bSL.value, bExit.value))" readonly [style.color]="calcWinLoss(calcReturns(bEntry.value, bSL.value, bExit.value)) === 'Win' ? '#00c851' : '#ff4444'" style="background: #222; font-weight: bold;"></div>
+          
+          <div class="form-group">
+            <label>Chart Screenshot</label>
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" style="font-size: 0.8rem; color: #888;">
+            @if (previewUrl) {
+              <img [src]="previewUrl" style="width: 100px; height: 50px; object-fit: cover; margin-top: 5px; border-radius: 4px; border: 1px solid #ffc107;">
+            }
+          </div>
+        </div> 
+        
+        <button class="primary-btn" 
+                style="background: #ffc107; color: black; margin-top: 20px;" 
+                (click)="submitBacktest(bAsset.value, bDateTime.value, bEntry.value, bSL.value, bExit.value); clearBacktestForm(bAsset, bDateTime, bEntry, bSL, bExit)">
+          Save Backtest Entry
+        </button>
+      </section>
 
-  <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #ffc107;">
-    <label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Avg R-Multiple</label>
-    <p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #ffc107;">
-      {{ btAverageR | number:'1.2-2' }}R
-    </p>
-  </div>
-</div>
-  <div class="fade-in" style="margin-top: 25px;">
-    <section class="card trade-form-card">
-      <h3 style="color: #ffc107;">New Backtest Entry</h3>
-      
-      <div class="trade-form-grid">
-        <div class="form-group"><label>Asset</label><input type="text" #bAsset placeholder="BTC/USDT"></div>
-        <div class="form-group"><label>Date & Time</label><input type="datetime-local" #bDateTime></div>
-        <div class="form-group"><label>Entry Price</label><input type="number" #bEntry (input)="0"></div>
-        <div class="form-group"><label>Stop Loss</label><input type="number" #bSL (input)="0"></div>
-        <div class="form-group"><label>Exit Price</label><input type="number" #bExit (input)="0"></div>
-
-        <div class="form-group">
-          <label>Direction</label>
-          <input type="text" [value]="calcDirection(bEntry.value, bSL.value)" readonly style="background: #222; color: #ffc107;">
-        </div>
-
-        <div class="form-group">
-          <label>Returns (R)</label>
-          <input type="text" 
-                 [value]="calcReturns(bEntry.value, bSL.value, bExit.value) | number:'1.2-2'" 
-                 readonly style="background: #222; color: #007bff;">
-        </div>
-
-        <div class="form-group">
-          <label>Win / Loss</label>
-          <input type="text" 
-                 [value]="calcWinLoss(calcReturns(bEntry.value, bSL.value, bExit.value))" 
-                 readonly 
-                 [style.color]="calcWinLoss(calcReturns(bEntry.value, bSL.value, bExit.value)) === 'Win' ? '#00c851' : '#ff4444'"
-                 style="background: #222; font-weight: bold;">
-        </div>
-      </div> <button class="primary-btn" style="background: #ffc107; color: black; margin-top: 20px;" 
-  (click)="submitBacktest(bAsset.value, bDateTime.value, bEntry.value, bSL.value, bExit.value); 
-           clearBacktestForm(bAsset, bDateTime, bEntry, bSL, bExit)">
-  Save & Clear
-</button>
-    </section>
-
-    <section class="card trade-history-card" style="margin-top: 20px;">
-      <h3>Backtest History</h3>
-      <table>
-        <thead>
-  <tr>
-    <th>Asset</th>
-    <th>Date/Time</th>
-    <th>Direction</th>
-    <th>Entry</th>
-    <th>Returns</th>
-    <th>Result</th>
-    <th>Action</th> </tr>
-</thead>
-        <tbody>
-  @for (record of backtests; track $index) {
-    <tr class="fade-in">
-      <td><strong>{{ record.asset | uppercase }}</strong></td>
-      <td style="color: #888;">{{ record.date | date:'short' }}</td>
-      <td>
-        <span [style.color]="record.direction === 'Long' ? '#00c851' : '#ff4444'">
-          {{ record.direction }}
-        </span>
-      </td>
-      <td>${{ record.entry | number:'1.2-2' }}</td>
-      <td [style.color]="record.returns >= 0 ? '#00c851' : '#ff4444'">
-        {{ record.returns | number:'1.2-2' }}R
-      </td>
-      <td>
-        <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;"
-              [style.background]="record.result === 'Win' ? '#00c85122' : '#ff444422'"
-              [style.color]="record.result === 'Win' ? '#00c851' : '#ff4444'">
-          {{ record.result }}
-        </span>
-      </td>
-      <td>
-  <button (click)="deleteBacktest(record._id)" 
-        style="background: none; border: none; color: #ff4444; cursor: pointer; padding: 5px;">
-  ✕
-</button>
-</td>
-    </tr>
-  } @empty {
-    <tr>
-      <td colspan="6" style="text-align: center; color: #666; padding: 40px;">
-        No backtest records found. Start logging above!
-      </td>
-    </tr>
+      <section class="card trade-history-card" style="margin-top: 20px;">
+        <h3>Backtest History</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Date/Time</th>
+              <th>Direction</th>
+              <th>Entry Price</th>
+              <th>Returns (R)</th>
+              <th>Result</th>
+              <th>Chart</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (record of backtests; track record._id) {
+              <tr class="fade-in">
+                <td><strong>{{ record.asset | uppercase }}</strong></td>
+                <td style="color: #888;">{{ record.date | date:'short' }}</td>
+                <td><span [style.color]="record.direction === 'Long' ? '#00c851' : '#ff4444'">{{ record.direction }}</span></td>
+                <td>${{ record.entry | number:'1.2-2' }}</td>
+                <td [style.color]="record.returns >= 0 ? '#00c851' : '#ff4444'">{{ record.returns | number:'1.2-2' }}R</td>
+                <td>
+                  <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;"
+                        [style.background]="record.result === 'Win' ? '#00c85122' : '#ff444422'"
+                        [style.color]="record.result === 'Win' ? '#00c851' : '#ff4444'">{{ record.result }}</span>
+                </td>
+                <td style="text-align: center;">
+                  @if (record.image) {
+                    <a [href]="record.image" target="_blank">
+                      <img [src]="record.image" style="width: 45px; height: 28px; object-fit: cover; border-radius: 3px; cursor: pointer; border: 1px solid #333;">
+                    </a>
+                  } @else {
+                    <span style="color: #444; font-size: 0.7rem;">NO IMG</span>
+                  }
+                </td>
+                <td><button (click)="deleteBacktest(record._id)" class="delete-btn" style="background: none; border: none; color: #ff4444; cursor: pointer;">✕</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    </div>
   }
-</tbody>
-      </table>
-    </section>
-  </div>
-}
 </div>
