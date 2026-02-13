@@ -57,6 +57,22 @@ const Goal = mongoose.model('Goal', new mongoose.Schema({
   deadline: String, createdBy: String
 }));
 
+// Backtest Schema
+const backtestSchema = new mongoose.Schema({
+  username: String, // To keep your data separate from others
+  asset: String,
+  date: Date,
+  direction: String,
+  entry: Number,
+  stopLoss: Number,
+  exit: Number,
+  returns: Number,
+  result: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Backtest = mongoose.model('Backtest', backtestSchema);
+
 // 3. ROUTES
 
 // --- Auth Routes ---
@@ -209,6 +225,25 @@ app.patch('/api/goals/:id', async (req, res) => {
     { new: true }
   );
   res.json(updatedGoal);
+});
+
+// 1. Get all backtests for a user
+app.get('/api/backtests/:username', async (req, res) => {
+  const data = await Backtest.find({ username: req.params.username }).sort({ date: -1 });
+  res.json(data);
+});
+
+// 2. Save a new backtest
+app.post('/api/backtests', async (req, res) => {
+  const newBt = new Backtest(req.body);
+  await newBt.save();
+  res.json({ success: true, message: "Backtest saved to cloud!" });
+});
+
+// 3. Delete a backtest
+app.delete('/api/backtests/:id', async (req, res) => {
+  await Backtest.findByIdAndDelete(req.params.id);
+  res.json({ success: true });
 });
 
 // Health Check

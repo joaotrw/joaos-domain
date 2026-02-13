@@ -32,12 +32,14 @@
         }
 
         @if (currentView === 'crypto') {
-          <app-crypto-hub 
-            [allTrades]="allTrades"
-            [winRate]="winRate"
-            [totalNetProfit]="cryptoNet"
-            (tradeAddedEvent)="addTrade($event)">
-          </app-crypto-hub>
+         <app-crypto-hub 
+  [currentUser]="currentUsername" 
+  [allTrades]="allTrades"
+  [totalTrades]="allTrades.length"
+  [winRate]="winRate"
+  [totalNetProfit]="cryptoNet"
+  (tradeAddedEvent)="addTrade($event)">
+</app-crypto-hub>
         }
 
         @if (currentView === 'finance') {

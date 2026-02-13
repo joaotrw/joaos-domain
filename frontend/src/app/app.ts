@@ -27,7 +27,7 @@ import { TradeService } from './services/trade.service';
 })
 export class AppComponent implements OnInit {
   // 1. Inject Services
-  private auth = inject(AuthService);
+public auth = inject(AuthService); // NEW: Change 'private' to 'public'
   private finance = inject(FinanceService);
   private project = inject(ProjectService);
   private trade = inject(TradeService);
@@ -57,9 +57,12 @@ export class AppComponent implements OnInit {
     }
   }
 
+  currentUsername: string = '';
+
   // --- MASTER SYNC ---
   syncData() {
     console.log('🔄 Syncing All Systems...');
+    this.currentUsername = localStorage.getItem('currentUser') || ''; // Get the name from storage
     this.project.getProjects().subscribe(res => this.allProjects = res);
     this.trade.getTrades().subscribe(res => this.allTrades = res);
     this.finance.getFinance().subscribe(res => this.allFinance = res);

@@ -27,8 +27,20 @@ export class TradeService {
     return this.http.post(`${environment.apiUrl}/trades`, tradeData);
   }
 
-  // --- ANALYTICS LOGIC (The "Brain" of the Crypto Hub) ---
+  // --- BACKTEST API METHODS ---
+  getBacktests(username: string): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/backtests/${username}`);
+  }
 
+  saveBacktest(data: any): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/backtests`, data);
+  }
+
+  deleteBacktest(id: string): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/backtests/${id}`);
+  }
+
+  // --- ANALYTICS LOGIC ---
   calculateNetProfit(trades: any[]): number {
     const gains = trades.reduce((sum, t) => sum + (t.realisedGains || 0), 0);
     const losses = trades.reduce((sum, t) => sum + (t.realisedLoss || 0), 0);
@@ -40,6 +52,7 @@ export class TradeService {
     const wins = trades.filter(t => (t.realisedGains || 0) > 0).length;
     return (wins / trades.length) * 100;
   }
+
 
   calculateAverageR(trades: any[]): number {
     if (trades.length === 0) return 0;
@@ -56,4 +69,6 @@ export class TradeService {
       net: gains - losses
     };
   }
+
+
 }

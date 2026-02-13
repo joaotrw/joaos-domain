@@ -4,6 +4,7 @@
     <div class="sub-nav">
       <button [class.active-tab]="cryptoSubView === 'log'" (click)="cryptoSubView = 'log'">Trade Logger</button>
       <button [class.active-tab]="cryptoSubView === 'stats'" (click)="cryptoSubView = 'stats'">Analytics</button>
+      <button [class.active-tab]="cryptoSubView === 'backtest'" (click)="cryptoSubView = 'backtest'">Backtesting</button>
     </div>
   </header>
 
@@ -53,28 +54,25 @@
             <tr><th>Date</th><th>Asset</th><th>Action</th><th>Price</th><th>Strategy</th><th style="text-align: right;">Result</th></tr>
           </thead>
           <tbody>
-  @for (trade of allTrades; track trade._id) {
-    <tr>
-      <td style="color: #666;">{{ trade.date | date:'shortDate' }}</td>
-      
-      <td><strong style="color: #fff;">{{ trade.asset | uppercase }}</strong></td>
-      
-      <td>
-        <span [style.color]="trade.action === 'Long' ? '#00c851' : '#ff4444'" style="font-weight: 600; font-size: 0.8rem;">
-          {{ trade.action | uppercase }}
-        </span>
-      </td>
-      
-      <td>${{ trade.price | number:'1.2-2' }}</td>
-      <td><span style="background: #222; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">{{ trade.strategy }}</span></td>
-      <td style="text-align: right;">
-        @if (trade.realisedGains > 0) { <span class="profit">+${{ trade.realisedGains | number:'1.2-2' }}</span> }
-        @else if (trade.realisedLoss > 0) { <span class="loss">-${{ trade.realisedLoss | number:'1.2-2' }}</span> }
-        @else { <span style="color: #444;">$0.00</span> }
-      </td>
-    </tr>
-  }
-</tbody>
+            @for (trade of allTrades; track trade._id) {
+              <tr>
+                <td style="color: #666;">{{ trade.date | date:'shortDate' }}</td>
+                <td><strong style="color: #fff;">{{ trade.asset | uppercase }}</strong></td>
+                <td>
+                  <span [style.color]="trade.action === 'Long' ? '#00c851' : '#ff4444'" style="font-weight: 600; font-size: 0.8rem;">
+                    {{ trade.action | uppercase }}
+                  </span>
+                </td>
+                <td>${{ trade.price | number:'1.2-2' }}</td>
+                <td><span style="background: #222; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">{{ trade.strategy }}</span></td>
+                <td style="text-align: right;">
+                  @if (trade.realisedGains > 0) { <span class="profit">+${{ trade.realisedGains | number:'1.2-2' }}</span> }
+                  @else if (trade.realisedLoss > 0) { <span class="loss">-${{ trade.realisedLoss | number:'1.2-2' }}</span> }
+                  @else { <span style="color: #444;">$0.00</span> }
+                </td>
+              </tr>
+            }
+          </tbody>
         </table>
       </section>
     </div>
@@ -101,4 +99,117 @@
       </div>
     </div>
   }
+
+  @if (cryptoSubView === 'backtest') {
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+  <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #666;">
+    <label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">BT Sessions</label>
+    <p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0;">{{ btTotalTrades }}</p>
+  </div>
+
+  <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #00c851;">
+    <label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">BT Win Rate</label>
+    <p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #00c851;">
+      {{ btWinRate | number:'1.1-1' }}%
+    </p>
+  </div>
+
+  <div class="card stat-box" style="padding: 15px; text-align: center; border-top: 3px solid #ffc107;">
+    <label style="font-size: 0.7rem; color: #888; text-transform: uppercase;">Avg R-Multiple</label>
+    <p style="font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #ffc107;">
+      {{ btAverageR | number:'1.2-2' }}R
+    </p>
+  </div>
+</div>
+  <div class="fade-in" style="margin-top: 25px;">
+    <section class="card trade-form-card">
+      <h3 style="color: #ffc107;">New Backtest Entry</h3>
+      
+      <div class="trade-form-grid">
+        <div class="form-group"><label>Asset</label><input type="text" #bAsset placeholder="BTC/USDT"></div>
+        <div class="form-group"><label>Date & Time</label><input type="datetime-local" #bDateTime></div>
+        <div class="form-group"><label>Entry Price</label><input type="number" #bEntry (input)="0"></div>
+        <div class="form-group"><label>Stop Loss</label><input type="number" #bSL (input)="0"></div>
+        <div class="form-group"><label>Exit Price</label><input type="number" #bExit (input)="0"></div>
+
+        <div class="form-group">
+          <label>Direction</label>
+          <input type="text" [value]="calcDirection(bEntry.value, bSL.value)" readonly style="background: #222; color: #ffc107;">
+        </div>
+
+        <div class="form-group">
+          <label>Returns (R)</label>
+          <input type="text" 
+                 [value]="calcReturns(bEntry.value, bSL.value, bExit.value) | number:'1.2-2'" 
+                 readonly style="background: #222; color: #007bff;">
+        </div>
+
+        <div class="form-group">
+          <label>Win / Loss</label>
+          <input type="text" 
+                 [value]="calcWinLoss(calcReturns(bEntry.value, bSL.value, bExit.value))" 
+                 readonly 
+                 [style.color]="calcWinLoss(calcReturns(bEntry.value, bSL.value, bExit.value)) === 'Win' ? '#00c851' : '#ff4444'"
+                 style="background: #222; font-weight: bold;">
+        </div>
+      </div> <button class="primary-btn" style="background: #ffc107; color: black; margin-top: 20px;" 
+  (click)="submitBacktest(bAsset.value, bDateTime.value, bEntry.value, bSL.value, bExit.value); 
+           clearBacktestForm(bAsset, bDateTime, bEntry, bSL, bExit)">
+  Save & Clear
+</button>
+    </section>
+
+    <section class="card trade-history-card" style="margin-top: 20px;">
+      <h3>Backtest History</h3>
+      <table>
+        <thead>
+  <tr>
+    <th>Asset</th>
+    <th>Date/Time</th>
+    <th>Direction</th>
+    <th>Entry</th>
+    <th>Returns</th>
+    <th>Result</th>
+    <th>Action</th> </tr>
+</thead>
+        <tbody>
+  @for (record of backtests; track $index) {
+    <tr class="fade-in">
+      <td><strong>{{ record.asset | uppercase }}</strong></td>
+      <td style="color: #888;">{{ record.date | date:'short' }}</td>
+      <td>
+        <span [style.color]="record.direction === 'Long' ? '#00c851' : '#ff4444'">
+          {{ record.direction }}
+        </span>
+      </td>
+      <td>${{ record.entry | number:'1.2-2' }}</td>
+      <td [style.color]="record.returns >= 0 ? '#00c851' : '#ff4444'">
+        {{ record.returns | number:'1.2-2' }}R
+      </td>
+      <td>
+        <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;"
+              [style.background]="record.result === 'Win' ? '#00c85122' : '#ff444422'"
+              [style.color]="record.result === 'Win' ? '#00c851' : '#ff4444'">
+          {{ record.result }}
+        </span>
+      </td>
+      <td>
+  <button (click)="deleteBacktest(record._id)" 
+        style="background: none; border: none; color: #ff4444; cursor: pointer; padding: 5px;">
+  ✕
+</button>
+</td>
+    </tr>
+  } @empty {
+    <tr>
+      <td colspan="6" style="text-align: center; color: #666; padding: 40px;">
+        No backtest records found. Start logging above!
+      </td>
+    </tr>
+  }
+</tbody>
+      </table>
+    </section>
+  </div>
+}
 </div>
