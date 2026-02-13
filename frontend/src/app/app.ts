@@ -45,13 +45,24 @@ showGoalForm = false; // Controls form visibility
 
 // Update ngOnInit to remember the role on refresh
 ngOnInit() {
+  // 1. Check if the 'true' string exists in storage
   const savedLogin = localStorage.getItem('isLoggedIn');
+  this.currentView = (localStorage.getItem('activeTab') as any) || 'home';
+  
   if (savedLogin === 'true') {
+    // 2. Restore all user states
     this.isLoggedIn = true;
     this.userRole = localStorage.getItem('userRole') || 'User';
+    // This part is crucial for your "createdBy" filters to work!
+    const currentUser = localStorage.getItem('currentUser'); 
+
+    console.log(`Restored session for: ${currentUser} (${this.userRole})`);
     
-    // RUN INITIAL SYNC IMMEDIATELY
+    // 3. Trigger data fetch now that we have the identity back
     this.syncData(); 
+  } else {
+    console.log("No active session found. Redirecting to login.");
+    this.isLoggedIn = false;
   }
 }
 
@@ -98,12 +109,17 @@ login(name: string, pass: string) {
     });
 }
 
-  logout() {
-    this.isLoggedIn = false;
-    // CLEAR LOCAL STORAGE
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('currentUser');
-  }
+logout() {
+  this.isLoggedIn = false;
+  this.userRole = 'User';
+  
+  // Clear everything so the next refresh shows the login page
+  localStorage.clear(); 
+  // OR clear specifically:
+  // localStorage.removeItem('isLoggedIn');
+  // localStorage.removeItem('userRole');
+  // localStorage.removeItem('currentUser');
+}
 
 register(name: string, pass: string) {
   this.http.post<{success: boolean, message: string}>(`${environment.apiUrl}/register`, 
@@ -207,6 +223,7 @@ refreshDashboard() {
 // Function to switch pages
 setView(view: 'home' | 'crypto' | 'finance') {
   this.currentView = view;
+  localStorage.setItem('activeTab', view); // Save the tab
   
   if (view === 'crypto') { 
     this.loadTrades(); 
