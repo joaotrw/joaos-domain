@@ -318,15 +318,9 @@ get today() { return new Date().toISOString().split('T')[0]; }
 
 // Add these getters inside your AppComponent class
 get capitalOneBalance(): number {
-  const income = this.allIncome
-    .filter(i => i.source === 'Salary') // Or however you want to attribute income
-    .reduce((sum, i) => sum + i.amount, 0);
-    
-  const expenses = this.allFinance
-    .filter(f => f.bank === 'Capital One')
-    .reduce((sum, f) => sum + f.amount, 0);
-    
-  return income - expenses; 
+  return this.allFinance
+    .filter(f => f.bank?.toLowerCase() === 'capital one') // Use lowercase check
+    .reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
 }
 
 get santanderBalance(): number {
@@ -336,7 +330,9 @@ get santanderBalance(): number {
 }
 
 get totalExpenses(): number {
-  return this.allFinance.reduce((sum, item) => sum + (item.amount || 0), 0);
+  // Add a console log here to see what's happening during calculation
+  console.log("Calculating totals for:", this.allFinance);
+  return this.allFinance.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 }
 
 get totalIncome(): number {
