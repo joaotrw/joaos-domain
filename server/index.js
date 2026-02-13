@@ -56,8 +56,18 @@ const Trade = mongoose.model('Trade', new mongoose.Schema({
 
 // Trade Routes
 app.get('/api/trades', async (req, res) => {
-  const trades = await Trade.find().sort({ date: -1 });
-  res.json(trades);
+  try {
+    const username = req.headers['current-user'];
+    const userRole = req.headers['user-role'];
+
+    // Apply the same logic: Admin sees all, Users see theirs.
+    let query = userRole === 'Admin' ? {} : { createdBy: username };
+
+    const trades = await Trade.find(query).sort({ date: -1 });
+    res.json(trades);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching trades" });
+  }
 });
 
 app.post('/api/trades', async (req, res) => {
@@ -126,8 +136,18 @@ const Project = mongoose.model('Project', new mongoose.Schema({
 
 // Get all projects
 app.get('/api/projects', async (req, res) => {
-  const projects = await Project.find().sort({ createdAt: -1 });
-  res.json(projects);
+  try {
+    const username = req.headers['current-user'];
+    const userRole = req.headers['user-role'];
+
+    // If Admin, find all. If User, only find theirs.
+    let query = userRole === 'Admin' ? {} : { createdBy: username };
+
+    const projects = await Project.find(query).sort({ createdAt: -1 });
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching projects" });
+  }
 });
 
 // Add a new project
@@ -202,13 +222,27 @@ const Finance = mongoose.model('Finance', new mongoose.Schema({
 // --- Finance Routes ---
 
 // Get all finance entries (sorted by date descending)
+// index.js
+
 app.get('/api/finance', async (req, res) => {
   try {
-    // Sorting by date descending AND createdAt descending as a backup
-    const entries = await Finance.find().sort({ date: -1, createdAt: -1 });
-    res.json(entries);
+    // 1. Get the identity from headers (sent by your new Angular code)
+    const username = req.headers['current-user'];
+    const userRole = req.headers['user-role'];
+
+    // 2. Default query: find nothing (safety first)
+    let query = {};
+
+    // 3. Logic: If NOT admin, filter by their username
+    if (userRole !== 'Admin') {
+      query = { createdBy: username };
+    } 
+    // If it IS 'Admin', query stays {} (which means "find everything")
+
+    const data = await Finance.find(query); // 'Finance' is your Mongoose model
+    res.json(data);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching finance data" });
+    res.status(500).json({ message: err.message });
   }
 });
 // Add a new finance entry
@@ -246,12 +280,23 @@ const Income = mongoose.model('Income', new mongoose.Schema({
 
 // --- Income Routes ---
 app.get('/api/income', async (req, res) => {
-  const incomes = await Income.find().sort({ date: -1 });
-  res.json(incomes);
+  try {
+    const username = req.headers['current-user'];
+    const userRole = req.headers['user-role'];
+
+    // Add the filter logic here too!
+    let query = userRole === 'Admin' ? {} : { createdBy: username };
+
+    const incomes = await Income.find(query).sort({ date: -1 });
+    res.json(incomes);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching income" });
+  }
 });
 
 app.post('/api/income', async (req, res) => {
-  const newIncome = new Income(req.body);
+  const { date, source, amount, note, createdBy } = req.body;
+  const newIncome = new Income({ date, source, amount, note, createdBy });
   await newIncome.save();
   res.json({ success: true });
 });

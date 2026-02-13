@@ -123,12 +123,15 @@ register(name: string, pass: string) {
 
   // 3. DATA & SERVER MANAGEMENT
 loadUsers() {
-    this.http.get<any[]>(`${environment.apiUrl}/users`)
-      .subscribe({
-        next: (data) => this.allUsers = data,
-        error: (err) => console.error("Could not load users", err)
-      });
-  }
+  // Only load users if the person logged in is an Admin
+  if (this.userRole !== 'Admin') return; 
+
+  this.http.get<any[]>(`${environment.apiUrl}/users`, this.getAuthHeaders())
+    .subscribe({
+      next: (data) => this.allUsers = data,
+      error: (err) => console.error("Could not load users", err)
+    });
+}
 
   deleteUser(id: string) {
     if (confirm('Warning: This will permanently remove this user. Proceed?')) {
@@ -152,7 +155,12 @@ loadUsers() {
   }
 
   loadProjects() {
-  this.http.get<any[]>(`${environment.apiUrl}/projects`)
+  const headers = {
+    'current-user': localStorage.getItem('currentUser') || '',
+    'user-role': localStorage.getItem('userRole') || 'User'
+  };
+
+  this.http.get<any[]>(`${environment.apiUrl}/projects`, { headers })
     .subscribe(data => this.allProjects = data);
 }
 
@@ -216,7 +224,12 @@ setView(view: 'home' | 'crypto' | 'finance') {
 
 
 loadTrades() {
-  this.http.get<any[]>(`${environment.apiUrl}/trades`)
+  const headers = {
+    'current-user': localStorage.getItem('currentUser') || '',
+    'user-role': localStorage.getItem('userRole') || 'User'
+  };
+
+  this.http.get<any[]>(`${environment.apiUrl}/trades`, { headers })
     .subscribe(data => this.allTrades = data);
 }
 
@@ -315,12 +328,14 @@ get totalNetBalance(): number {
 }
 
 loadFinance() {
-  this.http.get<any[]>(`${environment.apiUrl}/finance`)
+  const headers = {
+    'current-user': localStorage.getItem('currentUser') || '',
+    'user-role': localStorage.getItem('userRole') || 'User'
+  };
+
+  this.http.get<any[]>(`${environment.apiUrl}/finance`, { headers })
     .subscribe({
-      next: (data) => {
-        this.allFinance = data;
-        console.log('Finance data loaded:', data);
-      },
+      next: (data) => this.allFinance = data,
       error: (err) => console.error("Finance load failed", err)
     });
 }
@@ -371,7 +386,12 @@ deleteFinanceTransaction(id: string) {
 }
 
 loadIncome() {
-  this.http.get<any[]>(`${environment.apiUrl}/income`)
+  const headers = {
+    'current-user': localStorage.getItem('currentUser') || '',
+    'user-role': localStorage.getItem('userRole') || 'User'
+  };
+
+  this.http.get<any[]>(`${environment.apiUrl}/income`, { headers })
     .subscribe(data => this.allIncome = data);
 }
 
@@ -406,7 +426,12 @@ getPercent(current: number, target: number): number {
 }
 
 loadGoals() {
-  this.http.get<any[]>(`${environment.apiUrl}/goals`)
+  const headers = {
+    'current-user': localStorage.getItem('currentUser') || '',
+    'user-role': localStorage.getItem('userRole') || 'User'
+  };
+
+  this.http.get<any[]>(`${environment.apiUrl}/goals`, { headers })
     .subscribe(data => this.goals = data);
 }
 
@@ -465,7 +490,14 @@ deleteGoal(id: string) {
   }
 }
 
-
+private getAuthHeaders() {
+  return {
+    headers: {
+      'current-user': localStorage.getItem('currentUser') || '',
+      'user-role': localStorage.getItem('userRole') || 'User'
+    }
+  };
+}
 
 
 }
