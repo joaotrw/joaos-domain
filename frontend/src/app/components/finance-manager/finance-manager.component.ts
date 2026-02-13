@@ -11,7 +11,7 @@ import { FinancialGoalsComponent } from '../financial-goals/financial-goals.comp
   styleUrls: ['./finance-manager.component.css']
 })
 export class FinanceManagerComponent {
-  @Input() allFinance: any[] = [];
+ @Input() allFinance: any[] = [];
   @Input() allIncome: any[] = [];
   @Input() goals: any[] = [];
   @Input() today: string = '';
@@ -19,8 +19,8 @@ export class FinanceManagerComponent {
   @Input() totalIncome: number = 0;
   @Input() totalExpenses: number = 0;
   @Input() totalNetBalance: number = 0;
-  @Input() capitalOneBalance: number = 0;
-  @Input() santanderBalance: number = 0;
+  @Input() capitalOneBalance: number = 0; 
+  @Input() santanderBalance: number = 0; // Keep this so your Santander box stays alive!
 
   @Output() addExpenseEvent = new EventEmitter<any>();
   @Output() deleteExpenseEvent = new EventEmitter<string>();
