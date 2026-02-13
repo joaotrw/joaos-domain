@@ -258,9 +258,12 @@ realisedGains: parseFloat(form.realisedGains) || 0,
   };
 
   this.http.post(`${environment.apiUrl}/trades`, finalTradeData)
-    .subscribe(() => {
-      this.loadTrades();
-      alert('Trade Logged to Database!');
+    .subscribe({
+      next: () => {
+        // 2. Fetch the new list immediately!
+        this.loadTrades();
+        alert('Trade Logged!');
+      }
     });
 }
 
@@ -328,47 +331,41 @@ get totalNetBalance(): number {
 }
 
 loadFinance() {
-  const headers = {
-    'current-user': localStorage.getItem('currentUser') || '',
-    'user-role': localStorage.getItem('userRole') || 'User'
-  };
-
-  this.http.get<any[]>(`${environment.apiUrl}/finance`, { headers })
+  // Use the helper to ensure we pass the 'current-user' and 'user-role' headers
+  // Without these, the backend query might return 0 results or an error!
+  this.http.get<any[]>(`${environment.apiUrl}/finance`, this.getAuthHeaders())
     .subscribe({
-      next: (data) => this.allFinance = data,
-      error: (err) => console.error("Finance load failed", err)
+      next: (data) => {
+        console.log('Finance data received from server:', data);
+        // By assigning the new array, Angular's Change Detection triggers immediately
+        this.allFinance = data; 
+      },
+      error: (err) => {
+        console.error("Finance load failed. Check headers or connection.", err);
+      }
     });
 }
 
 addFinanceTransaction(data: any) {
-  // 1. Keep your safety checks!
-  if(!data.amount || !data.date) {
-    alert("Please enter a date and amount");
-    return;
-  }
+  console.log("=== 🚀 ANGULAR SENDING DATA ===");
+  const user = localStorage.getItem('currentUser');
+  console.log("Logged in User:", user);
 
-  // 2. Ensure data types are correct before sending to AWS
   const finalData = {
     ...data,
     amount: parseFloat(data.amount),
-    createdBy: localStorage.getItem('currentUser') || 'Joao' 
+    createdBy: user || 'Joao' 
   };
+  
+  console.log("Final Payload:", finalData);
 
   this.http.post(`${environment.apiUrl}/finance`, finalData).subscribe({
-    next: (res) => {
-      console.log('Transaction Added:', res);
-      
-      // 3. Refresh the table data
-      this.loadFinance(); 
-      
-      // 4. Trigger the reset inside the child component
-      if (this.financeComponent) {
-        this.financeComponent.resetForm();
-      }
-      
-      console.log('UI Refreshed and Child Form Reset');
+    next: (res: any) => {
+      console.log("=== ✅ SERVER RESPONDED ===", res);
+      setTimeout(() => this.loadFinance(), 500);
+      if (this.financeComponent) this.financeComponent.resetForm();
     },
-    error: (err) => alert('Failed to add transaction. Check your connection.')
+    error: (err) => console.error("=== ❌ HTTP POST FAILED ===", err)
   });
 }
 
@@ -399,18 +396,17 @@ addIncome(data: any) {
   const finalData = {
     ...data,
     amount: parseFloat(data.amount),
-    createdBy: localStorage.getItem('currentUser') || 'Joao'
+    createdBy: localStorage.getItem('currentUser')
   };
 
   this.http.post(`${environment.apiUrl}/income`, finalData).subscribe({
     next: () => {
-      this.loadIncome(); // <--- REFRESH
+      // 1. Fetch the new list immediately!
+      this.loadIncome(); 
       alert('Income added!');
-      // If you have @ViewChild for income inputs, clear them here too
     }
   });
 }
-
 deleteIncome(id: string) {
   if (confirm('Delete this income entry?')) {
     this.http.delete(`${environment.apiUrl}/income/${id}`).subscribe(() => {

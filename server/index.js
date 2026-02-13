@@ -248,14 +248,37 @@ app.get('/api/finance', async (req, res) => {
 // Add a new finance entry
 app.post('/api/finance', async (req, res) => {
   try {
+    // 1. Debug Logs: See exactly what is arriving and WHERE it's going
+    console.log("--- New Transaction Attempt ---");
+    console.log("Data:", req.body);
+    console.log("Target Database:", mongoose.connection.name);
+    console.log("Target Host:", mongoose.connection.host);
+
     const { date, bank, amount, category, description, createdBy } = req.body;
+
+    // 2. Security Check: Prevent "Invisible" entries
+    if (!createdBy) {
+      console.error("CRITICAL: Transaction received without a 'createdBy' owner!");
+      return res.status(400).json({ success: false, message: "User identity missing." });
+    }
+
     const newEntry = new Finance({ 
-      date, bank, amount, category, description, createdBy 
+      date, 
+      bank, 
+      amount, 
+      category, 
+      description, 
+      createdBy 
     });
-    await newEntry.save();
-    res.json({ success: true });
+
+    // 3. Save and Confirm
+    const savedDoc = await newEntry.save();
+    console.log("Successfully saved to MongoDB ID:", savedDoc._id);
+
+    res.json({ success: true, id: savedDoc._id });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    console.error("Save error details:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -294,11 +317,42 @@ app.get('/api/income', async (req, res) => {
   }
 });
 
-app.post('/api/income', async (req, res) => {
-  const { date, source, amount, note, createdBy } = req.body;
-  const newIncome = new Income({ date, source, amount, note, createdBy });
-  await newIncome.save();
-  res.json({ success: true });
+app.post('/api/finance', async (req, res) => {
+  try {
+    console.log("=== 🔍 INCOMING FINANCE POST ===");
+    console.log("1. Raw Body:", JSON.stringify(req.body, null, 2));
+    
+    // Check Connection Info
+    console.log("2. Database Name:", mongoose.connection.name);
+    console.log("3. Database Host:", mongoose.connection.host);
+    console.log("4. Connection State:", mongoose.connection.readyState); 
+    // (0=disconnected, 1=connected, 2=connecting)
+
+    const { date, bank, amount, category, description, createdBy } = req.body;
+
+    if (!createdBy) {
+      console.error("❌ ERROR: createdBy is missing! Data will be invisible to users.");
+    }
+
+    const newEntry = new Finance({ 
+      date, 
+      bank, 
+      amount: parseFloat(amount), 
+      category, 
+      description, 
+      createdBy 
+    });
+
+    const savedDoc = await newEntry.save();
+    console.log("5. ✅ SUCCESS: Saved to collection 'finances'");
+    console.log("6. Saved ID:", savedDoc._id);
+    console.log("===============================");
+
+    res.json({ success: true, id: savedDoc._id });
+  } catch (err) {
+    console.error("❌ DATABASE SAVE ERROR:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 app.delete('/api/income/:id', async (req, res) => {
