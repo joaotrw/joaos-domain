@@ -20,12 +20,15 @@ export class TradeService {
 
   // --- API METHODS ---
   getTrades(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.apiUrl}/trades`, this.getAuthHeaders());
-  }
+  const headers = this.getAuthHeaders();
+  console.log('DEBUG [8]: Service calling GET /api/trades with headers:', headers);
+  return this.http.get<any[]>(`${environment.apiUrl}/trades`, headers);
+}
 
-  logTrade(tradeData: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/trades`, tradeData);
-  }
+logTrade(tradeData: any): Observable<any> {
+  console.log('DEBUG [9]: Service calling POST /api/trades with data:', tradeData);
+  return this.http.post(`${environment.apiUrl}/trades`, tradeData);
+}
 
   // --- BACKTEST API METHODS ---
   getBacktests(username: string): Observable<any[]> {
@@ -69,6 +72,12 @@ export class TradeService {
       net: gains - losses
     };
   }
+
+  updateTrade(id: string, data: any): Observable<any> {
+  return this.http.patch(`${environment.apiUrl}/trades/${id}`, data);
+}
+
+
 
 
 }

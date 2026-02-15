@@ -137,3 +137,186 @@ tr:hover {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+.edit-input {
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.edit-icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    filter: grayscale(1);
+    transition: 0.2s;
+}
+
+.edit-icon-btn:hover {
+    filter: grayscale(0);
+    transform: scale(1.2);
+}
+
+.save-btn, .cancel-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin: 0 5px;
+}
+
+/* Dashboard Container */
+.stats-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+}
+
+/* Row 1: Top Stat Boxes (4 Columns) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.stat-box {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #3b82f6; /* Accent border */
+  transition: transform 0.2s;
+}
+
+.stat-box:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stat-box h4 {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-box p {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Row 2: Insights (2 Columns) */
+.insights-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr; /* Strategy table gets more space */
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .insights-grid {
+    grid-template-columns: 1fr; /* Stacks on mobile */
+  }
+}
+
+/* Insight Cards */
+.insight-card {
+  padding: 20px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 1px solid #333;
+}
+
+.insight-card h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+/* Strategy Table Styling */
+.insight-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.insight-card th {
+  text-align: left;
+  color: #666;
+  font-size: 0.85rem;
+  padding-bottom: 10px;
+}
+
+.insight-card td {
+  padding: 12px 0;
+  border-bottom: 1px solid #222;
+}
+
+/* Discipline Check Section */
+.discipline-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.disc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+}
+
+.disc-item span {
+  color: #aaa;
+}
+
+.disc-item strong {
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #555;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+.backtest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 15px;
+}
+
+.bt-summary-stats {
+  display: flex;
+  gap: 30px;
+}
+
+.bt-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.bt-stat span {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bt-stat strong {
+  font-size: 1.2rem;
+}

@@ -12,8 +12,7 @@ const app = express();
 app.use(cors());
 
 /** * IMPORTANT: We increased the limit to 50mb. 
- * Base64 image strings are much larger than standard text, 
- * so this prevents "413 Payload Too Large" errors.
+ * Base64 image strings are much larger than standard text.
  */
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -37,17 +36,39 @@ const User = mongoose.model('User', new mongoose.Schema({
   role: { type: String, default: 'User' }
 }));
 
+// All fields requested for the Trade Logger
+// index.js - Updated Trade Model
 const Trade = mongoose.model('Trade', new mongoose.Schema({
-  date: String, asset: String, action: String, amount: Number, price: Number,
-  strategy: String, rMultiple: Number, purpleBelt: Boolean, platform: String,
-  orderType: String, stopLoss: Number, exitPrice: Number, entryTime: String,
-  exitDate: String, exitTime: String, riskAmount: Number, expectedLoss: Number,
-  realisedLoss: Number, realisedGains: Number, createdBy: String
+  date: String, 
+  asset: String, 
+  action: String, 
+  amount: Number, 
+  price: Number,
+  strategy: String, 
+  rMultiple: Number, 
+  purpleBelt: { type: Boolean, default: false }, 
+  platform: String,
+  orderType: String, 
+  stopLoss: Number, 
+  exitPrice: Number, 
+  entryTime: String,
+  exitDate: String, 
+  exitTime: String, 
+  riskAmount: Number, 
+  expectedLoss: Number,
+  realisedLoss: Number, 
+  realisedGains: Number,
+  result: String,   
+  image: String,    
+  createdBy: String
 }));
 
 const Project = mongoose.model('Project', new mongoose.Schema({
-  title: String, description: String, status: { type: String, default: 'Pending' },
-  createdBy: String, createdAt: { type: Date, default: Date.now },
+  title: String, 
+  description: String, 
+  status: { type: String, default: 'Pending' },
+  createdBy: String, 
+  createdAt: { type: Date, default: Date.now },
   tasks: [{ text: String, completed: { type: Boolean, default: false } }]
 }));
 
@@ -62,12 +83,19 @@ const Finance = mongoose.model('Finance', new mongoose.Schema({
 }));
 
 const Income = mongoose.model('Income', new mongoose.Schema({
-  date: String, source: String, amount: Number, note: String, createdBy: String
+  date: String, 
+  source: String, 
+  amount: Number, 
+  note: String, 
+  createdBy: String
 }));
 
 const Goal = mongoose.model('Goal', new mongoose.Schema({
-  name: String, targetAmount: Number, currentAmount: { type: Number, default: 0 },
-  deadline: String, createdBy: String
+  name: String, 
+  targetAmount: Number, 
+  currentAmount: { type: Number, default: 0 },
+  deadline: String, 
+  createdBy: String
 }));
 
 const Task = mongoose.model('Task', new mongoose.Schema({
@@ -77,8 +105,7 @@ const Task = mongoose.model('Task', new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }));
 
-// Backtest Schema - Updated with 'image' field
-const backtestSchema = new mongoose.Schema({
+const Backtest = mongoose.model('Backtest', new mongoose.Schema({
   username: String, 
   asset: String,
   date: Date,
@@ -88,11 +115,9 @@ const backtestSchema = new mongoose.Schema({
   exit: Number,
   returns: Number,
   result: String,
-  image: String, // Stores the Base64 screenshot string
+  image: String, 
   createdAt: { type: Date, default: Date.now }
-});
-
-const Backtest = mongoose.model('Backtest', backtestSchema);
+}));
 
 // ==========================================
 // 4. ROUTES
@@ -135,20 +160,17 @@ app.delete('/api/users/:id', async (req, res) => {
 
 // --- Finance Routes ---
 app.get('/api/finance', async (req, res) => {
-  try {
-    const username = req.headers['current-user'];
-    const userRole = req.headers['user-role'];
-    let query = userRole === 'Admin' ? {} : { createdBy: username };
-    const data = await Finance.find(query).sort({ date: -1 });
-    res.json(data);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  const currentUser = req.headers['current-user'];
+  let query = req.headers['user-role'] === 'Admin' ? {} : { 
+    $or: [{ createdBy: currentUser }, { createdBy: { $exists: false } }]
+  };
+  const finance = await Finance.find(query).sort({ date: -1 });
+  res.json(finance);
 });
 
 app.post('/api/finance', async (req, res) => {
   try {
-    const { date, bank, amount, category, description, createdBy } = req.body;
-    if (!createdBy) return res.status(400).json({ success: false, message: "User identity missing." });
-    const newEntry = new Finance({ date, bank, amount: parseFloat(amount), category, description, createdBy });
+    const newEntry = new Finance(req.body);
     await newEntry.save();
     res.json({ success: true });
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
@@ -161,24 +183,20 @@ app.delete('/api/finance/:id', async (req, res) => {
 
 // --- Income Routes ---
 app.get('/api/income', async (req, res) => {
-  const query = req.headers['user-role'] === 'Admin' ? {} : { createdBy: req.headers['current-user'] };
-  const incomes = await Income.find(query).sort({ date: -1 });
-  res.json(incomes);
+  const currentUser = req.headers['current-user'];
+  const query = req.headers['user-role'] === 'Admin' ? {} : { 
+    $or: [{ createdBy: currentUser }, { createdBy: { $exists: false } }]
+  };
+  const income = await Income.find(query).sort({ date: -1 });
+  res.json(income);
 });
 
 app.post('/api/income', async (req, res) => {
   try {
-    const { date, source, amount, note, createdBy } = req.body;
-    if (!createdBy) return res.status(400).json({ success: false, message: "User identity missing." });
-    const newIncome = new Income({ date, source, amount: parseFloat(amount), note, createdBy });
+    const newIncome = new Income(req.body);
     await newIncome.save();
     res.json({ success: true });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
-});
-
-app.delete('/api/income/:id', async (req, res) => {
-  await Income.findByIdAndDelete(req.params.id);
-  res.json({ success: true });
 });
 
 // --- Project Routes ---
@@ -189,14 +207,8 @@ app.get('/api/projects', async (req, res) => {
 });
 
 app.post('/api/projects', async (req, res) => {
-  const { title, description, createdBy } = req.body;
-  const newProject = new Project({ title, description, createdBy });
+  const newProject = new Project(req.body);
   await newProject.save();
-  res.json({ success: true });
-});
-
-app.delete('/api/projects/:id', async (req, res) => {
-  await Project.findByIdAndDelete(req.params.id);
   res.json({ success: true });
 });
 
@@ -215,17 +227,40 @@ app.post('/api/projects/:id/tasks', async (req, res) => {
   res.json(project);
 });
 
-// --- Trade Routes ---
+// --- Trade Routes (Logger) ---
 app.get('/api/trades', async (req, res) => {
-  const query = req.headers['user-role'] === 'Admin' ? {} : { createdBy: req.headers['current-user'] };
-  const trades = await Trade.find(query).sort({ date: -1 });
-  res.json(trades);
+  try {
+    const user = req.headers['current-user'];
+    const query = req.headers['user-role'] === 'Admin' ? {} : { createdBy: user };
+    const trades = await Trade.find(query).sort({ date: -1 });
+    res.json(trades);
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
 app.post('/api/trades', async (req, res) => {
-  const newTrade = new Trade(req.body);
-  await newTrade.save();
-  res.json({ success: true });
+  try {
+    const newTrade = new Trade(req.body);
+    await newTrade.save();
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+});
+
+app.patch('/api/trades/:id', async (req, res) => {
+  try {
+    const updated = await Trade.findByIdAndUpdate(
+      req.params.id, 
+      { $set: req.body }, 
+      { new: true }
+    );
+    res.json({ success: true, trade: updated });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+});
+
+app.delete('/api/trades/:id', async (req, res) => {
+  try {
+    await Trade.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
 // --- Goal Routes ---
@@ -251,16 +286,13 @@ app.patch('/api/goals/:id', async (req, res) => {
 });
 
 // --- Backtest Routes ---
-
-// 1. Get all backtests for a user
 app.get('/api/backtests/:username', async (req, res) => {
   try {
     const data = await Backtest.find({ username: req.params.username }).sort({ date: -1 });
     res.json(data);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
-// 2. Save a new backtest (supports images)
 app.post('/api/backtests', async (req, res) => {
   try {
     const newBt = new Backtest(req.body);
@@ -269,7 +301,6 @@ app.post('/api/backtests', async (req, res) => {
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
-// 3. Delete a backtest
 app.delete('/api/backtests/:id', async (req, res) => {
   try {
     await Backtest.findByIdAndDelete(req.params.id);
@@ -277,6 +308,7 @@ app.delete('/api/backtests/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
+// --- Task Routes ---
 app.get('/api/tasks', async (req, res) => {
   const query = req.headers['user-role'] === 'Admin' ? {} : { createdBy: req.headers['current-user'] };
   const tasks = await Task.find(query).sort({ createdAt: -1 });
@@ -284,8 +316,7 @@ app.get('/api/tasks', async (req, res) => {
 });
 
 app.post('/api/tasks', async (req, res) => {
-  const { text, createdBy } = req.body;
-  const newTask = new Task({ text, createdBy });
+  const newTask = new Task(req.body);
   await newTask.save();
   res.json({ success: true });
 });
@@ -302,14 +333,11 @@ app.delete('/api/tasks/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-// Health Check
+// --- Server & Health Check ---
 app.get('/api/welcome', (req, res) => {
   res.json({ message: "Connected to Joao's Domain Backend." });
 });
 
-// ==========================================
-// 5. START SERVER
-// ==========================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);

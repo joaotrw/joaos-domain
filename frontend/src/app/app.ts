@@ -138,10 +138,28 @@ export class AppComponent implements OnInit {
   }
 
   // --- TRADE & FINANCE GETTERS ---
-  addTrade(data: any) { this.trade.logTrade(data).subscribe(() => this.syncData()); }
-  addFinance(data: any) { this.finance.addFinance(data).subscribe(() => this.syncData()); }
+addTrade(data: any) { 
+  const formatted = { ...data, amount: Number(data.amount) }; // Force number
+  this.trade.logTrade(formatted).subscribe(() => this.syncData()); 
+}
+addFinance(data: any) { 
+  const formatted = { 
+    ...data, 
+    amount: Number(data.amount),
+    createdBy: this.currentUsername // FIXED: Added required identity field
+  }; 
+  this.finance.addFinance(formatted).subscribe(() => this.syncData()); 
+}
+
   deleteFinance(id: string) { this.finance.deleteFinance(id).subscribe(() => this.syncData()); }
-  addIncome(data: any) { this.finance.addIncome(data).subscribe(() => this.syncData()); }
+addIncome(data: any) { 
+  const formatted = { 
+    ...data, 
+    amount: Number(data.amount),
+    createdBy: this.currentUsername // FIXED: Added required identity field
+  }; 
+  this.finance.addIncome(formatted).subscribe(() => this.syncData()); 
+}
   deleteIncome(id: string) { this.finance.deleteIncome(id).subscribe(() => this.syncData()); }
   addGoal(data: any) { this.finance.addGoal(data).subscribe(() => this.syncData()); }
   updateGoal(data: any) { this.finance.updateGoalProgress(data.id, data.amount).subscribe(() => this.syncData()); }

@@ -137,3 +137,23 @@ tr:hover {
     opacity: 1;
     transform: scale(1.2);
 }
+
+/* finance-manager.component.css */
+.statistics-card table td {
+    border-bottom: 1px solid #222;
+}
+
+.statistics-card tr:last-child td {
+    border-bottom: none;
+}
+
+.stats-container {
+    margin-top: 20px;
+}
+
+/* Adjust for smaller screens so the columns stack */
+@media (max-width: 900px) {
+    .stats-container {
+        grid-template-columns: 1fr !important;
+    }
+}

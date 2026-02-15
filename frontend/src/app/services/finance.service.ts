@@ -9,7 +9,6 @@ import { Observable } from 'rxjs';
 export class FinanceService {
   private http = inject(HttpClient);
 
-  // Helper to get headers for every request
   private getAuthHeaders() {
     return {
       headers: {
@@ -24,25 +23,29 @@ export class FinanceService {
     return this.http.get<any[]>(`${environment.apiUrl}/finance`, this.getAuthHeaders());
   }
 
-  addFinance(data: any) {
-    return this.http.post(`${environment.apiUrl}/finance`, data);
-  }
+addFinance(data: any) {
+  // FIXED: Added this.getAuthHeaders()
+  return this.http.post(`${environment.apiUrl}/finance`, data, this.getAuthHeaders());
+}
 
-  deleteFinance(id: string) {
-    return this.http.delete(`${environment.apiUrl}/finance/${id}`);
-  }
+deleteFinance(id: string) {
+  // FIXED: Added this.getAuthHeaders()
+  return this.http.delete(`${environment.apiUrl}/finance/${id}`, this.getAuthHeaders());
+}
 
   // --- INCOME ---
   getIncome(): Observable<any[]> {
     return this.http.get<any[]>(`${environment.apiUrl}/income`, this.getAuthHeaders());
   }
 
-  addIncome(data: any) {
-    return this.http.post(`${environment.apiUrl}/income`, data);
-  }
+addIncome(data: any) {
+  // FIXED: Added this.getAuthHeaders()
+  return this.http.post(`${environment.apiUrl}/income`, data, this.getAuthHeaders());
+}
 
   deleteIncome(id: string) {
-    return this.http.delete(`${environment.apiUrl}/income/${id}`);
+    // FIXED: Added headers
+    return this.http.delete(`${environment.apiUrl}/income/${id}`, this.getAuthHeaders());
   }
 
   // --- GOALS ---
@@ -50,20 +53,21 @@ export class FinanceService {
     return this.http.get<any[]>(`${environment.apiUrl}/goals`, this.getAuthHeaders());
   }
 
-  addGoal(goal: any) {
-    return this.http.post(`${environment.apiUrl}/goals`, goal);
-  }
+ addGoal(goal: any) {
+  // FIXED: Added this.getAuthHeaders()
+  return this.http.post(`${environment.apiUrl}/goals`, goal, this.getAuthHeaders());
+}
 
   updateGoalProgress(goalId: string, amount: number) {
-    return this.http.patch(`${environment.apiUrl}/goals/${goalId}`, { amount });
+    // FIXED: Added headers
+    return this.http.patch(`${environment.apiUrl}/goals/${goalId}`, { amount }, this.getAuthHeaders());
   }
 
   deleteGoal(id: string) {
-    return this.http.delete(`${environment.apiUrl}/goals/${id}`);
+    // FIXED: Added headers
+    return this.http.delete(`${environment.apiUrl}/goals/${id}`, this.getAuthHeaders());
   }
 
-  // --- CALCULATIONS (THE "PROFESSIONAL" WAY) ---
-  
   calculateTotal(items: any[]): number {
     return items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }

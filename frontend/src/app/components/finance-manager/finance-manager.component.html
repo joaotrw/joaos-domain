@@ -3,7 +3,9 @@
     <h1>🏦 Personal Finance</h1>
     <div class="sub-nav">
       <button [class.active-tab]="incomeSubView === 'expenses'" (click)="incomeSubView = 'expenses'">Expenses</button>
-      <button [class.active-tab]="incomeSubView === 'income'" (click)="incomeSubView = 'income'">Income / Cash Flow</button>
+      <button [class.active-tab]="incomeSubView === 'income'" (click)="incomeSubView = 'income'">Income</button>
+      <button [class.active-tab]="incomeSubView === 'transactions'" (click)="incomeSubView = 'transactions'">Transactions</button>
+      <button [class.active-tab]="incomeSubView === 'stats'" (click)="incomeSubView = 'stats'">Statistics</button>
     </div>
     <p class="subtitle">Manage and track your bank transactions</p>
   </header>
@@ -72,13 +74,8 @@
         <h3>Recent Transactions</h3>
         <table>
           <thead>
-    <tr>
-        <th>Date</th>
-        <th>Source</th>
-        <th>Note</th>
-        <th style="text-align: right;">Amount</th> <th style="text-align: center;">Action</th>
-    </tr>
-</thead>
+            <tr><th>Date</th><th>Source</th><th>Category</th><th>Note</th><th style="text-align: right;">Amount</th><th style="text-align: center;">Action</th></tr>
+          </thead>
           <tbody>
             @for (item of allFinance; track item._id) {
               <tr>
@@ -143,4 +140,95 @@
       </section>
     </div>
   }
+
+  @if (incomeSubView === 'transactions') {
+    <section class="card finance-history-card fade-in">
+      <h3>All Ledger Transactions</h3>
+      <p style="color: #666; font-size: 0.8rem; margin-bottom: 10px;">
+        Showing {{ allTransactions.length }} total entries found in database.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Source</th>
+            <th>Note/Category</th>
+            <th style="text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tx of allTransactions; track (tx._id || tx.date + tx.amount)) {
+            <tr>
+              <td>{{ tx.date || 'No Date' }}</td>
+              <td>
+                <span [style.color]="tx.isNegative ? '#ff4444' : '#28a745'" style="font-weight: 500;">
+                  {{ tx.txType }}
+                </span>
+              </td>
+              <td>{{ tx.displaySource }}</td>
+              <td style="color: #aaa;">{{ tx.displayNote }}</td>
+              <td style="text-align: right; font-weight: bold;" 
+                  [style.color]="tx.isNegative ? '#fff' : '#28a745'">
+                {{ tx.isNegative ? '-' : '+' }}${{ (tx.amount || 0) | number:'1.2-2' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  @if (incomeSubView === 'stats') {
+  <div class="stats-container fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    
+    <section class="card statistics-card">
+      <h3>Monthly Cash Flow Summary</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th style="text-align: right;">Spent</th>
+            <th style="text-align: right;">Net</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (stat of monthlyStats; track stat.month) {
+            <tr>
+              <td>{{ stat.month }}</td>
+              <td style="text-align: right; color: #ff4444;">-${{ stat.spent | number:'1.2-2' }}</td>
+              <td style="text-align: right;" [style.color]="(stat.earned - stat.spent) >= 0 ? '#28a745' : '#ff4444'">
+                ${{ (stat.earned - stat.spent) | number:'1.2-2' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card statistics-card">
+      <h3>Spending by Category</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th style="text-align: right;">Total Amount</th>
+            <th style="text-align: right;">% of Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cat of categoryStats; track cat.name) {
+            <tr>
+              <td style="font-weight: bold; color: #fff;">{{ cat.name }}</td>
+              <td style="text-align: right; color: #ff4444;">-${{ cat.total | number:'1.2-2' }}</td>
+              <td style="text-align: right; color: #666;">
+                {{ (cat.total / totalExpenses * 100) | number:'1.1-1' }}%
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  </div>
+}
 </div>
