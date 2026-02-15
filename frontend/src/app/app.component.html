@@ -12,6 +12,7 @@
         <div class="logo">JD</div>
         <ul>
           <li [class.active]="currentView === 'home'" (click)="setView('home')">Home</li>
+          <li [class.active]="currentView === 'tasks'" (click)="setView('tasks')">Task Tracker</li>
           <li [class.active]="currentView === 'crypto'" (click)="setView('crypto')">Crypto</li>
           <li [class.active]="currentView === 'finance'" (click)="setView('finance')">Finance</li>
           <li (click)="logout()" class="logout-link">Logout</li>
@@ -20,49 +21,60 @@
 
       <main class="content">
         @if (currentView === 'home') {
+          <div class="welcome-section">
+            <h1>Welcome back, Joao</h1>
+            <p>Select a module from the sidebar to manage your systems.</p>
+          </div>
+        }
+
+        @if (currentView === 'tasks') {
           <app-project-tracker 
-            [allProjects]="allProjects" 
-            [userRole]="userRole"
-            (addProjectEvent)="addProject($event.title, $event.desc)"
-            (deleteProjectEvent)="deleteProject($event)"
-            (toggleStatusEvent)="toggleStatus($event)"
-            (addTaskEvent)="addTask($event.id, $event.text)"
-            (refreshEvent)="syncData()">
-          </app-project-tracker>
+  [allProjects]="allProjects" 
+  [allTasks]="allTasks" 
+  [userRole]="userRole"
+  (addProjectEvent)="addProject($event.title, $event.desc)"
+  (deleteProjectEvent)="deleteProject($event)"
+  (toggleStatusEvent)="toggleStatus($event)"
+  (addTaskEvent)="addTask($event.id, $event.text)"
+  (addTaskGlobalEvent)="addGlobalTask($event)"
+  (toggleTaskEvent)="toggleGlobalTask($event)"
+  (deleteTaskEvent)="deleteGlobalTask($event)"
+  (refreshEvent)="syncData()">
+</app-project-tracker>
         }
 
         @if (currentView === 'crypto') {
          <app-crypto-hub 
-  [currentUser]="currentUsername" 
-  [allTrades]="allTrades"
-  [totalTrades]="allTrades.length"
-  [winRate]="winRate"
-  [totalNetProfit]="cryptoNet"
-  (tradeAddedEvent)="addTrade($event)">
-</app-crypto-hub>
+          [currentUser]="currentUsername" 
+          [allTrades]="allTrades"
+          [totalTrades]="allTrades.length"
+          [winRate]="winRate"
+          [totalNetProfit]="cryptoNet"
+          (tradeAddedEvent)="addTrade($event)">
+        </app-crypto-hub>
         }
 
         @if (currentView === 'finance') {
-  <app-finance-manager 
-    #financeRef
-    [allFinance]="allFinance" 
-    [allIncome]="allIncome" 
-    [goals]="goals" 
-    [totalIncome]="totalIncome" 
-    [totalExpenses]="totalExpenses" 
-    [totalNetBalance]="netBalance"
-    [capitalOneBalance]="capOne" 
-    [santanderBalance]="santander"
-    
-    (addExpenseEvent)="addFinance($event)" 
-    (deleteExpenseEvent)="deleteFinance($event)"
-    (addIncomeEvent)="addIncome($event)" 
-    (deleteIncomeEvent)="deleteIncome($event)"
-    (addGoalEvent)="addGoal($event)"
-    (updateGoalEvent)="updateGoal($event)"
-    (deleteGoalEvent)="deleteGoal($event)">
-  </app-finance-manager>
-}
+          <app-finance-manager 
+            #financeRef
+            [allFinance]="allFinance" 
+            [allIncome]="allIncome" 
+            [goals]="goals" 
+            [totalIncome]="totalIncome" 
+            [totalExpenses]="totalExpenses" 
+            [totalNetBalance]="netBalance"
+            [capitalOneBalance]="capOne" 
+            [santanderBalance]="santander"
+            
+            (addExpenseEvent)="addFinance($event)" 
+            (deleteExpenseEvent)="deleteFinance($event)"
+            (addIncomeEvent)="addIncome($event)" 
+            (deleteIncomeEvent)="deleteIncome($event)"
+            (addGoalEvent)="addGoal($event)"
+            (updateGoalEvent)="updateGoal($event)"
+            (deleteGoalEvent)="deleteGoal($event)">
+          </app-finance-manager>
+        }
       </main>
     </div>
   }

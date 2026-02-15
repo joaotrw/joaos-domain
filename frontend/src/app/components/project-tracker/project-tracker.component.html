@@ -41,36 +41,47 @@
     </section>
 
     <section class="card full-width">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;">🚀 Project Tracker</h2>
-        @if (userRole === 'Admin') {
-          <div class="add-project-form" style="display: flex; gap: 10px;">
-            <input type="text" #pTitle placeholder="Project Title" style="padding: 8px;">
-            <input type="text" #pDesc placeholder="Description" style="padding: 8px;">
-            <button class="primary-btn" (click)="onAddProject(pTitle.value, pDesc.value); pTitle.value=''; pDesc.value=''">+ Add</button>
-          </div>
-        }
-      </div>
+  <div class="tracker-tabs" style="display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+    <h2 (click)="setTrackerMode('projects')" [style.color]="trackerMode === 'projects' ? '#007bff' : '#666'" style="cursor: pointer; margin: 0;">🚀 Projects</h2>
+    <h2 (click)="setTrackerMode('tasks')" [style.color]="trackerMode === 'tasks' ? '#007bff' : '#666'" style="cursor: pointer; margin: 0;">✅ Tasks</h2>
+  </div>
 
-      <div class="project-grid">
-        @for (project of allProjects; track project._id) {
-          <div class="project-item">
-            <div class="project-info">
-              <h3 (click)="selectProject(project)" style="cursor:pointer; color:#007bff; margin-bottom: 8px;">{{ project.title }}</h3>
-              <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 12px;">{{ project.description }}</p>
-              <span class="status-tag" 
-                    [style.cursor]="userRole === 'Admin' ? 'pointer' : 'default'" 
-                    (click)="userRole === 'Admin' && onToggleStatus(project._id)">
-                {{ project.status }}
-              </span>
-            </div>
-            @if (userRole === 'Admin') {
-              <button class="delete-btn-small" (click)="onDeleteProject(project._id)">×</button>
-            }
+  @if (trackerMode === 'projects') {
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <p style="color: #888;">Manage your high-level project goals.</p>
+      @if (userRole === 'Admin') {
+        <div class="add-project-form">
+          <input type="text" #pTitle placeholder="Project Title">
+          <input type="text" #pDesc placeholder="Description">
+          <button class="primary-btn" (click)="onAddProject(pTitle.value, pDesc.value); pTitle.value=''; pDesc.value=''">+ Add</button>
+        </div>
+      }
+    </div>
+    }
+
+  @if (trackerMode === 'tasks') {
+    <div class="add-task-global" style="margin-bottom: 20px; display: flex; gap: 10px;">
+      <input type="text" #globalTaskInput placeholder="What needs to be done?" style="flex: 1; padding: 10px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 4px;">
+      <button class="primary-btn" (click)="onAddGlobalTask(globalTaskInput.value); globalTaskInput.value=''">Add Task</button>
+    </div>
+
+    <ul style="list-style: none; padding: 0;">
+      @for (task of allTasks; track task._id) {
+        <li style="display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 12px; margin-bottom: 8px; border-radius: 6px; border-left: 3px solid #007bff;">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <input type="checkbox" [checked]="task.completed" (change)="toggleTaskEvent.emit(task._id)" style="transform: scale(1.2);">
+            <span [style.text-decoration]="task.completed ? 'line-through' : 'none'" [style.color]="task.completed ? '#666' : 'white'">
+              {{ task.text }}
+            </span>
           </div>
-        }
-      </div>
-    </section>
+          <button (click)="deleteTaskEvent.emit(task._id)" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">Delete</button>
+        </li>
+      } @empty {
+        <p style="color: #666; font-style: italic;">No tasks found. Add one above!</p>
+      }
+    </ul>
+  }
+</section>
   </div>
 </div>
 

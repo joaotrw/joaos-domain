@@ -13,6 +13,7 @@ import { AuthService } from './services/auth.service';
 import { FinanceService } from './services/finance.service';
 import { ProjectService } from './services/project.service';
 import { TradeService } from './services/trade.service';
+import { TaskService } from './services/task.service'; // NEW SERVICE
 
 @Component({
   selector: 'app-root',
@@ -27,19 +28,22 @@ import { TradeService } from './services/trade.service';
 })
 export class AppComponent implements OnInit {
   // 1. Inject Services
-public auth = inject(AuthService); // NEW: Change 'private' to 'public'
+  public auth = inject(AuthService); 
   private finance = inject(FinanceService);
   private project = inject(ProjectService);
   private trade = inject(TradeService);
+  private task = inject(TaskService); // NEW: Inject Task Service
 
   // 2. UI State
   isLoggedIn = false;
   isRegisterMode = false;
-  currentView: 'home' | 'crypto' | 'finance' = 'home';
+  currentView: 'home' | 'crypto' | 'finance' | 'tasks' = 'home'; // UPDATED TYPE
   userRole = 'User';
+  currentUsername: string = '';
   
   // 3. Data Arrays
   allProjects: any[] = [];
+  allTasks: any[] = []; // NEW: Standalone tasks array
   allTrades: any[] = [];
   allFinance: any[] = [];
   allIncome: any[] = [];
@@ -57,37 +61,52 @@ public auth = inject(AuthService); // NEW: Change 'private' to 'public'
     }
   }
 
-  currentUsername: string = '';
-
   // --- MASTER SYNC ---
   syncData() {
     console.log('🔄 Syncing All Systems...');
-    this.currentUsername = localStorage.getItem('currentUser') || ''; // Get the name from storage
+    this.currentUsername = localStorage.getItem('currentUser') || '';
     this.project.getProjects().subscribe(res => this.allProjects = res);
+    this.task.getTasks().subscribe(res => this.allTasks = res); // NEW: Fetch Tasks
     this.trade.getTrades().subscribe(res => this.allTrades = res);
     this.finance.getFinance().subscribe(res => this.allFinance = res);
     this.finance.getIncome().subscribe(res => this.allIncome = res);
     this.finance.getGoals().subscribe(res => this.goals = res);
   }
 
-  // --- AUTH ACTIONS ---
+  // --- VIEW NAVIGATION ---
+  setView(view: 'home' | 'crypto' | 'finance' | 'tasks') {
+    this.currentView = view;
+    localStorage.setItem('activeTab', view);
+    this.syncData();
+  }
+
+  // --- STANDALONE TASK ACTIONS ---
+  addGlobalTask(text: string) {
+    this.task.addTask(text).subscribe(() => this.syncData());
+  }
+
+  toggleGlobalTask(id: string) {
+    this.task.toggleTask(id).subscribe(() => this.syncData());
+  }
+
+  deleteGlobalTask(id: string) {
+    this.task.deleteTask(id).subscribe(() => this.syncData());
+  }
+
+  // --- REMAINING AUTH & PROJECT ACTIONS ---
   onLogin(name: string, pass: string) {
-  this.auth.login(name, pass).subscribe({
-    next: (res: any) => {
-      if (res.success) {
-        this.auth.saveSession(name, res.role);
-        this.isLoggedIn = true;
-        this.userRole = res.role;
-        this.syncData();
-      }
-    },
-    error: (err) => {
-      // This will pop up the error message from your Node server
-      alert("Login Failed: " + (err.error.message || "Server Error"));
-      console.error("Login Error Details:", err);
-    }
-  });
-}
+    this.auth.login(name, pass).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.auth.saveSession(name, res.role);
+          this.isLoggedIn = true;
+          this.userRole = res.role;
+          this.syncData();
+        }
+      },
+      error: (err) => alert("Login Failed: " + (err.error.message || "Server Error"))
+    });
+  }
 
   onRegister(u: string, p: string) {
     this.auth.register(u, p).subscribe(() => {
@@ -102,7 +121,6 @@ public auth = inject(AuthService); // NEW: Change 'private' to 'public'
     this.currentView = 'home';
   }
 
-  // --- PROJECT ACTIONS ---
   addProject(title: string, desc: string) {
     this.project.addProject(title, desc).subscribe(() => this.syncData());
   }
@@ -119,41 +137,16 @@ public auth = inject(AuthService); // NEW: Change 'private' to 'public'
     this.project.addTask(id, text).subscribe(() => this.syncData());
   }
 
-  // --- TRADE ACTIONS ---
-  addTrade(data: any) {
-    this.trade.logTrade(data).subscribe(() => this.syncData());
-  }
+  // --- TRADE & FINANCE GETTERS ---
+  addTrade(data: any) { this.trade.logTrade(data).subscribe(() => this.syncData()); }
+  addFinance(data: any) { this.finance.addFinance(data).subscribe(() => this.syncData()); }
+  deleteFinance(id: string) { this.finance.deleteFinance(id).subscribe(() => this.syncData()); }
+  addIncome(data: any) { this.finance.addIncome(data).subscribe(() => this.syncData()); }
+  deleteIncome(id: string) { this.finance.deleteIncome(id).subscribe(() => this.syncData()); }
+  addGoal(data: any) { this.finance.addGoal(data).subscribe(() => this.syncData()); }
+  updateGoal(data: any) { this.finance.updateGoalProgress(data.id, data.amount).subscribe(() => this.syncData()); }
+  deleteGoal(id: string) { this.finance.deleteGoal(id).subscribe(() => this.syncData()); }
 
-  // --- FINANCE ACTIONS ---
-  addFinance(data: any) {
-    this.finance.addFinance(data).subscribe(() => this.syncData());
-  }
-
-  deleteFinance(id: string) {
-    this.finance.deleteFinance(id).subscribe(() => this.syncData());
-  }
-
-  addIncome(data: any) {
-    this.finance.addIncome(data).subscribe(() => this.syncData());
-  }
-
-  deleteIncome(id: string) {
-    this.finance.deleteIncome(id).subscribe(() => this.syncData());
-  }
-
-  addGoal(data: any) {
-    this.finance.addGoal(data).subscribe(() => this.syncData());
-  }
-
-  updateGoal(data: any) {
-    this.finance.updateGoalProgress(data.id, data.amount).subscribe(() => this.syncData());
-  }
-
-  deleteGoal(id: string) {
-    this.finance.deleteGoal(id).subscribe(() => this.syncData());
-  }
-
-  // --- GETTERS ---
   get totalExpenses() { return this.finance.calculateTotal(this.allFinance); }
   get totalIncome() { return this.finance.calculateTotal(this.allIncome); }
   get netBalance() { return this.totalIncome - this.totalExpenses; }
@@ -161,11 +154,4 @@ public auth = inject(AuthService); // NEW: Change 'private' to 'public'
   get santander() { return this.finance.calculateBankBalance(this.allFinance, 'santander'); }
   get winRate() { return this.trade.calculateWinRate(this.allTrades); }
   get cryptoNet() { return this.trade.calculateNetProfit(this.allTrades); }
-
-  // --- VIEW NAVIGATION ---
-  setView(view: 'home' | 'crypto' | 'finance') {
-    this.currentView = view;
-    localStorage.setItem('activeTab', view);
-    this.syncData();
-  }
 }

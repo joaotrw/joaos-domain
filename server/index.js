@@ -70,6 +70,13 @@ const Goal = mongoose.model('Goal', new mongoose.Schema({
   deadline: String, createdBy: String
 }));
 
+const Task = mongoose.model('Task', new mongoose.Schema({
+  text: { type: String, required: true },
+  completed: { type: Boolean, default: false },
+  createdBy: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+}));
+
 // Backtest Schema - Updated with 'image' field
 const backtestSchema = new mongoose.Schema({
   username: String, 
@@ -268,6 +275,31 @@ app.delete('/api/backtests/:id', async (req, res) => {
     await Backtest.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+});
+
+app.get('/api/tasks', async (req, res) => {
+  const query = req.headers['user-role'] === 'Admin' ? {} : { createdBy: req.headers['current-user'] };
+  const tasks = await Task.find(query).sort({ createdAt: -1 });
+  res.json(tasks);
+});
+
+app.post('/api/tasks', async (req, res) => {
+  const { text, createdBy } = req.body;
+  const newTask = new Task({ text, createdBy });
+  await newTask.save();
+  res.json({ success: true });
+});
+
+app.patch('/api/tasks/:id', async (req, res) => {
+  const task = await Task.findById(req.params.id);
+  task.completed = !task.completed;
+  await task.save();
+  res.json({ success: true, completed: task.completed });
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+  await Task.findByIdAndDelete(req.params.id);
+  res.json({ success: true });
 });
 
 // Health Check

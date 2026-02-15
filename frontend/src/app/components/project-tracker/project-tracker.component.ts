@@ -9,11 +9,13 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./project-tracker.component.css']
 })
 export class ProjectTrackerComponent {
+  trackerMode: 'projects' | 'tasks' = 'projects';
   // Data coming from the Boss (app.component)
   @Input() allProjects: any[] = [];
   @Input() userRole: string = '';
   @Input() allUsers: any[] = [];        // <--- Added
   @Input() serverMessage: string = '';  // <--- Added
+  @Input() allTasks: any[] = []; // You'll pass this from app.component
 
   // Events to tell the Boss what to do
   @Output() addProjectEvent = new EventEmitter<{title: string, desc: string}>();
@@ -22,6 +24,9 @@ export class ProjectTrackerComponent {
   @Output() addTaskEvent = new EventEmitter<{id: string, text: string}>();
   @Output() refreshEvent = new EventEmitter<void>(); // <--- Added
   @Output() checkServerEvent = new EventEmitter<void>(); // <--- Added
+  @Output() addTaskGlobalEvent = new EventEmitter<string>();
+@Output() toggleTaskEvent = new EventEmitter<string>();
+@Output() deleteTaskEvent = new EventEmitter<string>();
 
   selectedProject: any = null;
 
@@ -46,6 +51,14 @@ export class ProjectTrackerComponent {
     this.addTaskEvent.emit({ id, text });
   }
 
+  setTrackerMode(mode: 'projects' | 'tasks') {
+  this.trackerMode = mode;
+}
+
+onAddGlobalTask(text: string) {
+  if (text.trim()) this.addTaskGlobalEvent.emit(text);
+}
+
   onRefresh() {
     this.refreshEvent.emit();
   }
@@ -53,4 +66,6 @@ export class ProjectTrackerComponent {
   onCheckServer() {
     this.checkServerEvent.emit();
   }
+
+
 }
