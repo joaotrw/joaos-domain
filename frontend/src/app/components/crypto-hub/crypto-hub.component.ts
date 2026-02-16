@@ -80,13 +80,13 @@ export class CryptoHubComponent implements OnInit {
     const trades = this.allTrades;
     if (trades.length === 0) return;
 
-    const totalR = trades.reduce((sum, t) => sum + (t.rMultiple || 0), 0);
-    this.avgR = totalR / trades.length;
+const totalR = trades.reduce((sum, t) => sum + (t.rMultiple || 0), 0);
+  this.avgR = totalR / trades.length;
     
-    const wins = trades.filter(t => t.result === 'Win');
-    const losses = trades.filter(t => t.result === 'Loss');
-    const winProb = wins.length / trades.length;
-    const lossProb = losses.length / trades.length;
+const wins = trades.filter(t => (t.realisedGains || 0) > 0);
+  const losses = trades.filter(t => (t.realisedLoss || 0) > 0);
+const winProb = wins.length / trades.length;
+  const lossProb = losses.length / trades.length;
     
     const avgWinR = wins.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (wins.length || 1);
     const avgLossR = Math.abs(losses.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (losses.length || 1));

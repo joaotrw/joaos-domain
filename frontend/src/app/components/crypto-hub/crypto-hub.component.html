@@ -32,7 +32,7 @@
           <thead>
             <tr>
               <th (click)="toggleDateSort()" style="cursor: pointer;">Date {{ sortOrder === 'desc' ? '↓' : '↑' }}</th>
-              <th>Asset</th><th>Action</th><th>Order</th><th>Strategy</th><th>Price</th><th>SL</th><th>Risk</th><th>R-Mult</th><th>Result</th><th>Proof</th><th>Actions</th>
+              <th>Asset</th><th>Action</th><th>Order</th><th>Strategy</th><th>Price</th><th>SL</th><th>Risk</th><th>R-Mult</th><th>Result ($)</th><th>Proof</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -48,7 +48,12 @@
                   <td><input type="number" [(ngModel)]="record.stopLoss"></td>
                   <td><input type="number" [(ngModel)]="record.riskAmount"></td>
                   <td><input type="number" [(ngModel)]="record.rMultiple"></td>
-                  <td><input type="text" [(ngModel)]="record.result"></td>
+                  <td>
+                    <div class="edit-result-inputs">
+                      <input type="number" [(ngModel)]="record.realisedGains" placeholder="Gain $">
+                      <input type="number" [(ngModel)]="record.realisedLoss" placeholder="Loss $">
+                    </div>
+                  </td>
                   <td>Edit Mode</td>
                   <td><button (click)="saveEdit(record)">💾</button></td>
                 } @else {
@@ -61,7 +66,15 @@
                   <td>{{ record.stopLoss | number:'1.2-2' }}</td>
                   <td>${{ record.riskAmount }}</td>
                   <td>{{ record.rMultiple }}R</td>
-                  <td><span [class]="record.result">{{ record.result }}</span></td>
+                  <td>
+                    @if (record.realisedGains > 0) {
+                      <span class="Win">+$ {{ record.realisedGains | number:'1.2-2' }}</span>
+                    } @else if (record.realisedLoss > 0) {
+                      <span class="Loss">-$ {{ record.realisedLoss | number:'1.2-2' }}</span>
+                    } @else {
+                      <span class="Pending">{{ record.result || 'Pending' }}</span>
+                    }
+                  </td>
                   <td><img [src]="record.image" *ngIf="record.image" class="table-img-preview"></td>
                   <td><button (click)="startEdit(record)">✏️</button><button (click)="onDeleteTrade(record._id)" class="del-btn">🗑️</button></td>
                 }
@@ -73,7 +86,6 @@
     </div>
   }
 
- 
   @if (cryptoSubView === 'stats') {
     <div class="stats-dashboard fade-in">
       <div class="stats-grid">
@@ -105,7 +117,6 @@
     </div>
   }
 
- 
   @if (cryptoSubView === 'backtest') {
     <div class="backtest-layout fade-in">
       <section class="card backtest-form">
