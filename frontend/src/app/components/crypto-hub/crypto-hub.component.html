@@ -114,16 +114,33 @@
       </div>
       <div class="insights-grid">
         <div class="card insight-card">
-          <h3>Strategy Performance</h3>
-          <table>
-            <thead><tr><th>Strategy</th><th>Trades</th><th>Win Rate</th><th>Profit</th></tr></thead>
-            <tbody>
-              @for (s of strategyStats; track s.name) {
-                <tr><td><strong>{{ s.name }}</strong></td><td>{{ s.count }}</td><td>{{ s.winRate | number:'1.0-0' }}%</td><td [style.color]="s.profit >= 0 ? '#00c851' : '#ff4444'">${{ s.profit | number:'1.2-2' }}</td></tr>
-              }
-            </tbody>
-          </table>
-        </div>
+  <h3>Strategy Performance</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Strategy</th>
+        <th>Trades</th>
+        <th>Win Rate</th>
+        <th>Expectancy</th> <th>Profit</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (s of strategyStats; track s.name) {
+        <tr>
+          <td><strong>{{ s.name }}</strong></td>
+          <td>{{ s.count }}</td>
+          <td>{{ s.winRate | number:'1.0-0' }}%</td>
+          <td [style.color]="s.expectancy >= 0 ? '#00c851' : '#ff4444'">
+            {{ s.expectancy | number:'1.2-2' }} R
+          </td>
+          <td [style.color]="s.profit >= 0 ? '#00c851' : '#ff4444'">
+            ${{ s.profit | number:'1.2-2' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
         <div class="card insight-card">
           <h3>Discipline Check (Purple Belt)</h3>
           <div class="discipline-stats">

@@ -76,39 +76,60 @@ export class CryptoHubComponent implements OnInit {
   }
 
   // --- CALCULATE ANALYTICS TAB ---
-  calculateAdvancedStats() {
-    const trades = this.allTrades;
-    if (trades.length === 0) return;
+calculateAdvancedStats() {
+  const trades = this.allTrades;
+  if (trades.length === 0) return;
 
-const totalR = trades.reduce((sum, t) => sum + (t.rMultiple || 0), 0);
+  // 1. Global R-Multiple Stats
+  const totalR = trades.reduce((sum, t) => sum + (t.rMultiple || 0), 0);
   this.avgR = totalR / trades.length;
     
-const wins = trades.filter(t => (t.realisedGains || 0) > 0);
+  // 2. Define Wins and Losses based on money fields
+  const wins = trades.filter(t => (t.realisedGains || 0) > 0);
   const losses = trades.filter(t => (t.realisedLoss || 0) > 0);
-const winProb = wins.length / trades.length;
+  const winProb = wins.length / trades.length;
   const lossProb = losses.length / trades.length;
     
-    const avgWinR = wins.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (wins.length || 1);
-    const avgLossR = Math.abs(losses.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (losses.length || 1));
+  const avgWinR = wins.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (wins.length || 1);
+  const avgLossR = Math.abs(losses.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (losses.length || 1));
     
-    this.expectancy = (winProb * avgWinR) - (lossProb * avgLossR);
+  this.expectancy = (winProb * avgWinR) - (lossProb * avgLossR);
 
-    const purple = trades.filter(t => t.purpleBelt);
-    const standard = trades.filter(t => !t.purpleBelt);
-    this.purpleWinRate = purple.length ? (purple.filter(t => t.result === 'Win').length / purple.length) * 100 : 0;
-    this.standardWinRate = standard.length ? (standard.filter(t => t.result === 'Win').length / standard.length) * 100 : 0;
+  // 3. Discipline Check (Purple Belt) - Updated to use realisedGains
+  const purple = trades.filter(t => t.purpleBelt);
+  const standard = trades.filter(t => !t.purpleBelt);
+  
+  this.purpleWinRate = purple.length 
+    ? (purple.filter(t => (t.realisedGains || 0) > 0).length / purple.length) * 100 
+    : 0;
+  this.standardWinRate = standard.length 
+    ? (standard.filter(t => (t.realisedGains || 0) > 0).length / standard.length) * 100 
+    : 0;
 
-    const strategies = [...new Set(trades.map(t => t.strategy || 'Uncategorized'))];
-    this.strategyStats = strategies.map(name => {
-      const sTrades = trades.filter(t => (t.strategy || 'Uncategorized') === name);
-      return {
-        name,
-        count: sTrades.length,
-        winRate: (sTrades.filter(t => t.result === 'Win').length / sTrades.length) * 100,
-        profit: sTrades.reduce((sum, t) => sum + (t.realisedGains || 0) - (t.realisedLoss || 0), 0)
-      };
-    });
-  }
+  // 4. Strategy Performance with Expectancy
+  const strategies = [...new Set(trades.map(t => t.strategy || 'Uncategorized'))];
+  this.strategyStats = strategies.map(name => {
+    const sTrades = trades.filter(t => (t.strategy || 'Uncategorized') === name);
+    const sWins = sTrades.filter(t => (t.realisedGains || 0) > 0);
+    const sLosses = sTrades.filter(t => (t.realisedLoss || 0) > 0);
+    
+    // Strategy specific probabilities
+    const sWinProb = sWins.length / sTrades.length;
+    const sLossProb = sLosses.length / sTrades.length;
+    
+    // Strategy specific average R
+    const sAvgWinR = sWins.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (sWins.length || 1);
+    const sAvgLossR = Math.abs(sLosses.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (sLosses.length || 1));
+
+    return {
+      name,
+      count: sTrades.length,
+      winRate: sWinProb * 100,
+      expectancy: (sWinProb * sAvgWinR) - (sLossProb * sAvgLossR),
+      profit: sTrades.reduce((sum, t) => sum + (t.realisedGains || 0) - (t.realisedLoss || 0), 0)
+    };
+  });
+}
 
   // --- CRUD ACTIONS ---
  addTrade(
