@@ -111,28 +111,45 @@ const winProb = wins.length / trades.length;
   }
 
   // --- CRUD ACTIONS ---
-  addTrade(asset: any, platform: any, action: any, order: any, price: any, sl: any, risk: any, strategy: any, purple: any) {
-    const newTrade = {
-      date: new Date().toISOString().split('T')[0],
-      asset: asset.value.toUpperCase(),
-      platform: platform.value,
-      action: action.value,
-      orderType: order.value,
-      price: parseFloat(price.value),
-      stopLoss: parseFloat(sl.value),
-      riskAmount: parseFloat(risk.value),
-      strategy: strategy.value,
-      purpleBelt: purple.checked,
-      image: this.selectedFileBase64,
-      createdBy: this.currentUser,
-      rMultiple: 0, 
-      result: 'Pending'
-    };
-    this.tradeAddedEvent.emit(newTrade);
-    [asset, price, sl, risk, strategy].forEach(i => i.value = '');
-    purple.checked = false;
-    this.resetUpload();
-  }
+ addTrade(
+  date: any, asset: any, action: any, amount: any, price: any, 
+  strategy: any, rMult: any, purple: any, platform: any, order: any, 
+  sl: any, exitPrice: any, entryTime: any, exitDate: any, exitTime: any, 
+  risk: any, expLoss: any, realLoss: any, realGain: any
+) {
+  const newTrade = {
+    date: date.value || new Date().toISOString().split('T')[0],
+    asset: asset.value.toUpperCase(),
+    action: action.value,
+    amount: parseFloat(amount.value),
+    price: parseFloat(price.value),
+    strategy: strategy.value,
+    rMultiple: parseFloat(rMult.value) || 0,
+    purpleBelt: purple.checked,
+    platform: platform.value,
+    orderType: order.value,
+    stopLoss: parseFloat(sl.value),
+    exitPrice: parseFloat(exitPrice.value),
+    entryTime: entryTime.value,
+    exitDate: exitDate.value,
+    exitTime: exitTime.value,
+    riskAmount: parseFloat(risk.value),
+    expectedLoss: parseFloat(expLoss.value),
+    realisedLoss: parseFloat(realLoss.value) || 0,
+    realisedGains: parseFloat(realGain.value) || 0,
+    image: this.selectedFileBase64,
+    createdBy: this.currentUser,
+    result: (parseFloat(realGain.value) > 0) ? 'Win' : (parseFloat(realLoss.value) > 0 ? 'Loss' : 'Pending')
+  };
+
+  this.tradeAddedEvent.emit(newTrade); //
+
+  // Reset all fields
+  [date, asset, amount, price, strategy, rMult, sl, exitPrice, entryTime, 
+   exitDate, exitTime, risk, expLoss, realLoss, realGain].forEach(i => i.value = '');
+  purple.checked = false;
+  this.resetUpload();
+}
 
   onDeleteTrade(id: string) {
     if (confirm('Delete this trade?')) this.tradeDeletedEvent.emit(id);

@@ -11,21 +11,39 @@
   @if (cryptoSubView === 'log') {
     <div class="fade-in">
       <section class="card trade-form-card">
-        <h3>Log New Professional Trade</h3>
-        <div class="trade-form-grid">
-          <div class="form-group"><label>Asset</label><input type="text" #fAsset placeholder="BTC"></div>
-          <div class="form-group"><label>Platform</label><select #fPlatform><option value="GMX">GMX</option><option value="Binance">Binance</option></select></div>
-          <div class="form-group"><label>Action</label><select #fAction><option value="Long">Long</option><option value="Short">Short</option></select></div>
-          <div class="form-group"><label>Order</label><select #fOrderType><option value="Limit">Limit</option><option value="Market">Market</option></select></div>
-          <div class="form-group"><label>Entry Price</label><input type="number" #fPrice></div>
-          <div class="form-group"><label>Stop Loss</label><input type="number" #fSL></div>
-          <div class="form-group"><label>Risk ($)</label><input type="number" #fRisk></div>
-          <div class="form-group"><label>Strategy</label><input type="text" #fStrategy placeholder="System 3"></div>
-          <div class="form-group"><label>Purple Belt?</label><input type="checkbox" #fPurple style="width: auto;"></div>
-          <div class="form-group"><label>Screenshot</label><input type="file" (change)="onFileSelected($event)"></div>
-        </div>
-        <button class="primary-btn" (click)="addTrade(fAsset, fPlatform, fAction, fOrderType, fPrice, fSL, fRisk, fStrategy, fPurple)">Log Trade</button>
-      </section>
+  <h3>Log New Professional Trade</h3>
+  <div class="trade-form-grid">
+    <div class="form-group"><label>Date</label><input type="date" #fDate></div>
+    <div class="form-group"><label>Asset</label><input type="text" #fAsset placeholder="BTC"></div>
+    <div class="form-group"><label>Action</label><select #fAction><option value="Long">Long</option><option value="Short">Short</option></select></div>
+    <div class="form-group"><label>Amount</label><input type="number" #fAmount></div>
+    <div class="form-group"><label>Price</label><input type="number" #fPrice></div>
+    <div class="form-group"><label>Strategy</label><input type="text" #fStrategy placeholder="System 3"></div>
+    <div class="form-group"><label>R-Multiple</label><input type="number" step="0.1" #fRMult></div>
+    <div class="form-group"><label>Purple Belt?</label><input type="checkbox" #fPurple style="width: auto;"></div>
+    
+    <div class="form-group"><label>Platform</label><select #fPlatform><option value="GMX">GMX</option><option value="Binance">Binance</option></select></div>
+    <div class="form-group"><label>Order Type</label><select #fOrderType><option value="Limit">Limit</option><option value="Market">Market</option></select></div>
+    <div class="form-group"><label>Stop Loss</label><input type="number" #fSL></div>
+    <div class="form-group"><label>Exit Price</label><input type="number" #fExitPrice></div>
+    <div class="form-group"><label>Entry Time</label><input type="time" #fEntryTime></div>
+    <div class="form-group"><label>Exit Date</label><input type="date" #fExitDate></div>
+    <div class="form-group"><label>Exit Time</label><input type="time" #fExitTime></div>
+    
+    <div class="form-group"><label>Risk Amount ($)</label><input type="number" #fRisk></div>
+    <div class="form-group"><label>Expected Loss ($)</label><input type="number" #fExpLoss></div>
+    <div class="form-group"><label>Realised Loss ($)</label><input type="number" #fRealLoss></div>
+    <div class="form-group"><label>Realised Gains ($)</label><input type="number" #fRealGain></div>
+    
+    <div class="form-group"><label>Screenshot</label><input type="file" (change)="onFileSelected($event)"></div>
+  </div>
+  
+  <button class="primary-btn" (click)="addTrade(
+    fDate, fAsset, fAction, fAmount, fPrice, fStrategy, fRMult, fPurple, 
+    fPlatform, fOrderType, fSL, fExitPrice, fEntryTime, fExitDate, fExitTime, 
+    fRisk, fExpLoss, fRealLoss, fRealGain
+  )">Log Trade</button>
+</section>
 
       <section class="card table-card">
         <table>
