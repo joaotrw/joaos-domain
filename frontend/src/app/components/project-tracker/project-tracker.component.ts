@@ -55,8 +55,18 @@ export class ProjectTrackerComponent {
   this.trackerMode = mode;
 }
 
+onToggleTask(task: any) {
+  console.log("Child emitting task:", task); // Add this to verify _id exists
+  this.toggleTaskEvent.emit(task);
+}
+onDeleteTask(task: any) {
+  // We emit the whole task object for consistency
+  this.deleteTaskEvent.emit(task);
+}
+
 onAddGlobalTask(text: string) {
-  if (text.trim()) this.addTaskGlobalEvent.emit(text);
+  if (!text) return;
+  this.addTaskGlobalEvent.emit(text);
 }
 
   onRefresh() {

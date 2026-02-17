@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
 
+// GET projects
 router.get('/', async (req, res) => {
   try {
-    const currentUser = req.headers['current-user']; // Fix: Extract from headers
-    const query = req.headers['user-role'] === 'Admin' ? {} : { createdBy: currentUser };
+    const currentUser = req.headers['current-user']; // Define this first!
+    const userRole = req.headers['user-role'];
+    
+    const query = userRole === 'Admin' ? {} : { createdBy: currentUser };
     const projects = await Project.find(query).sort({ createdAt: -1 });
     res.json(projects);
   } catch (err) {

@@ -3,9 +3,16 @@ const router = express.Router();
 const Task = require('../models/Task');
 
 router.get('/', async (req, res) => {
-const query = req.headers['user-role'] === 'Admin' ? {} : { createdBy: currentUser };  const task = await Task.find(query).sort({ date: -1 });
-  const tasks = await Task.find(query).sort({ createdAt: -1 });
-  res.json(tasks);
+  try {
+    const currentUser = req.headers['current-user'];
+    const userRole = req.headers['user-role'];
+    
+    const query = userRole === 'Admin' ? {} : { createdBy: currentUser };
+    const tasks = await Task.find(query).sort({ createdAt: -1 });
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 router.post('/', async (req, res) => {
@@ -15,10 +22,16 @@ router.post('/', async (req, res) => {
 });
 
 router.patch('/:id', async (req, res) => {
-  const task = await Task.findById(req.params.id);
-  task.completed = !task.completed;
-  await task.save();
-  res.json({ success: true, completed: task.completed });
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ message: "Task not found in DB" });
+    
+    task.completed = !task.completed;
+    await task.save();
+    res.json({ success: true, completed: task.completed });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 router.delete('/:id', async (req, res) => {

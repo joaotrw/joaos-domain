@@ -92,13 +92,44 @@ setView(view: 'home' | 'crypto' | 'finance' | 'tasks') {
     this.task.addTask(text).subscribe(() => this.syncData());
   }
 
-  toggleGlobalTask(id: string) {
-    this.task.toggleTask(id).subscribe(() => this.syncData());
+// --- TASK ACTIONS ---
+toggleGlobalTask(task: any) {
+  // 1. Extract the ID (Check _id first for MongoDB)
+  const id = task?._id || task?.id;
+
+  // 2. Critical Check: If id is undefined, the URL becomes /api/tasks (which is a 404)
+  if (!id) {
+    console.error("❌ Cannot toggle: No ID found on task object", task);
+    return;
   }
 
-  deleteGlobalTask(id: string) {
-    this.task.deleteTask(id).subscribe(() => this.syncData());
-  }
+  // 3. Call the service
+  this.task.toggleTask(id).subscribe({
+    next: () => this.syncData(),
+    error: (err) => console.error("❌ Toggle failed at server:", err)
+  });
+}
+
+deleteGlobalTask(task: any) {
+  const id = task._id || task.id;
+  if (!id) return;
+
+  this.task.deleteTask(id).subscribe(() => this.syncData());
+}
+
+// --- PROJECT ACTIONS ---
+updateProjectStatus(project: any) {
+  // Use _id for MongoDB and call 'this.project' (not projectService)
+  const id = project._id || project.id;
+  if (!id) return;
+  this.project.updateStatus(id).subscribe(() => this.syncData());
+}
+
+// deleteProject should only appear ONCE in your file
+deleteProject(id: string) {
+  // Call 'this.project' (not projectService)
+  this.project.deleteProject(id).subscribe(() => this.syncData());
+}
 
   // --- REMAINING AUTH & PROJECT ACTIONS ---
   onLogin(name: string, pass: string) {
@@ -132,9 +163,6 @@ setView(view: 'home' | 'crypto' | 'finance' | 'tasks') {
     this.project.addProject(title, desc).subscribe(() => this.syncData());
   }
 
-  deleteProject(id: string) {
-    this.project.deleteProject(id).subscribe(() => this.syncData());
-  }
 
   toggleStatus(id: string) {
     this.project.updateStatus(id).subscribe(() => this.syncData());

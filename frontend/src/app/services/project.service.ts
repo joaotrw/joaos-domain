@@ -19,20 +19,23 @@ private getHeaders() {
     return this.http.get<any[]>(`${environment.apiUrl}/projects`, this.getHeaders());
   }
 
-  addProject(title: string, description: string) {
-    const createdBy = localStorage.getItem('currentUser') || 'Unknown';
-    return this.http.post(`${environment.apiUrl}/projects`, this.getHeaders());
-  }
+// project.service.ts
 
-  updateStatus(id: string) {
-    return this.http.put(`${environment.apiUrl}/projects`, this.getHeaders());
-  }
+addProject(title: string, description: string) {
+  return this.http.post(`${environment.apiUrl}/projects`, { title, description }, this.getHeaders());
+}
 
-  addTask(projectId: string, text: string) {
-    return this.http.post(`${environment.apiUrl}/projects`, this.getHeaders());
-  }
+updateStatus(id: string) {
+  // URL should be /api/projects/ID
+  return this.http.put(`${environment.apiUrl}/projects/${id}`, {}, this.getHeaders());
+}
 
-  deleteProject(id: string) {
-    return this.http.delete(`${environment.apiUrl}/projects`, this.getHeaders());
-  }
+addTask(projectId: string, text: string) {
+  // Typically project tasks are posted to a specific project sub-route
+  return this.http.post(`${environment.apiUrl}/projects/${projectId}/tasks`, { text }, this.getHeaders());
+}
+
+deleteProject(id: string) {
+  return this.http.delete(`${environment.apiUrl}/projects/${id}`, this.getHeaders());
+}
 }

@@ -19,16 +19,20 @@ private getHeaders() {
     return this.http.get<any[]>(`${environment.apiUrl}/tasks`, this.getHeaders());
   }
 
-  addTask(text: string) {
-    const createdBy = localStorage.getItem('currentUser') || 'Unknown';
-    return this.http.post(`${environment.apiUrl}/tasks`, this.getHeaders());
-  }
+// task.service.ts
 
-  toggleTask(id: string) {
-    return this.http.patch(`${environment.apiUrl}/tasks`, this.getHeaders());
-  }
+addTask(text: string) {
+  // Pass the text in the body so the backend can create the task
+  return this.http.post(`${environment.apiUrl}/tasks`, { text }, this.getHeaders());
+}
 
-  deleteTask(id: string) {
-    return this.http.delete(`${environment.apiUrl}/tasks`, this.getHeaders());
-  }
+toggleTask(id: string) {
+  // Append the ID to the URL: /api/tasks/123
+  return this.http.patch(`${environment.apiUrl}/tasks/${id}`, {}, this.getHeaders());
+}
+
+deleteTask(id: string) {
+  // Append the ID to the URL: /api/tasks/123
+  return this.http.delete(`${environment.apiUrl}/tasks/${id}`, this.getHeaders());
+}
 }
