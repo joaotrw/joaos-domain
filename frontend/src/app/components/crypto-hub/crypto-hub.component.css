@@ -320,3 +320,19 @@ tr:hover {
 .bt-stat strong {
   font-size: 1.2rem;
 }
+
+.view-chart-btn {
+  background: #333;
+  color: #00b8ff;
+  border: 1px solid #00b8ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.view-chart-btn:hover {
+  background: #00b8ff;
+  color: #fff;
+}

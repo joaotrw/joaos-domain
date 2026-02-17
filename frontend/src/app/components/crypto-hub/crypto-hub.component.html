@@ -12,32 +12,39 @@
     <div class="fade-in">
       <section class="card trade-form-card">
   <h3>Log New Professional Trade</h3>
+  
   <div class="trade-form-grid">
     <div class="form-group"><label>Date</label><input type="date" #fDate></div>
     <div class="form-group"><label>Asset</label><input type="text" #fAsset placeholder="BTC"></div>
-    <div class="form-group"><label>Action</label><select #fAction><option value="Long">Long</option><option value="Short">Short</option></select></div>
+    <div class="form-group">
+      <label>Action</label>
+      <select #fAction><option value="Long">Long</option><option value="Short">Short</option></select>
+    </div>
     <div class="form-group"><label>Amount</label><input type="number" #fAmount></div>
     <div class="form-group"><label>Price</label><input type="number" #fPrice></div>
-    <div class="form-group"><label>Strategy</label><input type="text" #fStrategy placeholder="System 3"></div>
-    <div class="form-group"><label>R-Multiple</label><input type="number" step="0.1" #fRMult></div>
-    <div class="form-group"><label>Purple Belt?</label><input type="checkbox" #fPurple style="width: auto;"></div>
-    
-    <div class="form-group"><label>Platform</label><select #fPlatform><option value="GMX">GMX</option><option value="Binance">Binance</option></select></div>
-    <div class="form-group"><label>Order Type</label><select #fOrderType><option value="Limit">Limit</option><option value="Market">Market</option></select></div>
-    <div class="form-group"><label>Stop Loss</label><input type="number" #fSL></div>
+    <div class="form-group"><label>Strategy</label><input type="text" #fStrategy></div>
+    <div class="form-group"><label>R-Multiple</label><input type="number" #fRMult></div>
+    <div class="form-group"><label>Purple Belt</label><input type="checkbox" #fPurple></div>
+    <div class="form-group"><label>Platform</label><input type="text" #fPlatform></div>
+    <div class="form-group">
+      <label>Order Type</label>
+      <select #fOrderType><option value="Market">Market</option><option value="Limit">Limit</option></select>
+    </div>
+    <div class="form-group"><label>SL</label><input type="number" #fSL></div>
     <div class="form-group"><label>Exit Price</label><input type="number" #fExitPrice></div>
     <div class="form-group"><label>Entry Time</label><input type="time" #fEntryTime></div>
     <div class="form-group"><label>Exit Date</label><input type="date" #fExitDate></div>
     <div class="form-group"><label>Exit Time</label><input type="time" #fExitTime></div>
-    
-    <div class="form-group"><label>Risk Amount ($)</label><input type="number" #fRisk></div>
-    <div class="form-group"><label>Expected Loss ($)</label><input type="number" #fExpLoss></div>
-    <div class="form-group"><label>Realised Loss ($)</label><input type="number" #fRealLoss></div>
-    <div class="form-group"><label>Realised Gains ($)</label><input type="number" #fRealGain></div>
-    
-    <div class="form-group"><label>Screenshot</label><input type="file" (change)="onFileSelected($event)"></div>
+    <div class="form-group"><label>Risk $</label><input type="number" #fRisk></div>
+    <div class="form-group"><label>Exp. Loss</label><input type="number" #fExpLoss></div>
+    <div class="form-group"><label>Realised Loss</label><input type="number" #fRealLoss></div>
+    <div class="form-group"><label>Realised Gain</label><input type="number" #fRealGain></div>
+    <div class="form-group">
+      <label>Chart</label>
+      <input type="file" (change)="onFileSelected($event)">
+    </div>
   </div>
-  
+
   <button class="primary-btn" (click)="addTrade(
     fDate, fAsset, fAction, fAmount, fPrice, fStrategy, fRMult, fPurple, 
     fPlatform, fOrderType, fSL, fExitPrice, fEntryTime, fExitDate, fExitTime, 
@@ -57,24 +64,7 @@
             @for (record of allTrades; track record._id) {
               <tr [class.editing-row]="editingTradeId === record._id">
                 @if (editingTradeId === record._id) {
-                  <td><input type="date" [(ngModel)]="record.date"></td>
-                  <td><input type="text" [(ngModel)]="record.asset"></td>
-                  <td><select [(ngModel)]="record.action"><option value="Long">Long</option><option value="Short">Short</option></select></td>
-                  <td><input type="text" [(ngModel)]="record.orderType"></td>
-                  <td><input type="text" [(ngModel)]="record.strategy"></td>
-                  <td><input type="number" [(ngModel)]="record.price"></td>
-                  <td><input type="number" [(ngModel)]="record.stopLoss"></td>
-                  <td><input type="number" [(ngModel)]="record.riskAmount"></td>
-                  <td><input type="number" [(ngModel)]="record.rMultiple"></td>
-                  <td>
-                    <div class="edit-result-inputs">
-                      <input type="number" [(ngModel)]="record.realisedGains" placeholder="Gain $">
-                      <input type="number" [(ngModel)]="record.realisedLoss" placeholder="Loss $">
-                    </div>
-                  </td>
-                  <td>Edit Mode</td>
-                  <td><button (click)="saveEdit(record)">💾</button></td>
-                } @else {
+                   } @else {
                   <td>{{ record.date }}</td>
                   <td><span *ngIf="record.purpleBelt">🟣 </span><strong>{{ record.asset }}</strong></td>
                   <td><span [class]="record.action">{{ record.action }}</span></td>
@@ -93,7 +83,15 @@
                       <span class="Pending">{{ record.result || 'Pending' }}</span>
                     }
                   </td>
-                  <td><img [src]="record.image" *ngIf="record.image" class="table-img-preview"></td>
+                  
+                  <td>
+                    @if (record.image) {
+                      <button (click)="openChart(record.image)" class="view-chart-btn">🖼️ View</button>
+                    } @else {
+                      <span style="color: #666;">-</span>
+                    }
+                  </td>
+                  
                   <td><button (click)="startEdit(record)">✏️</button><button (click)="onDeleteTrade(record._id)" class="del-btn">🗑️</button></td>
                 }
               </tr>
@@ -104,80 +102,60 @@
     </div>
   }
 
-  @if (cryptoSubView === 'stats') {
-    <div class="stats-dashboard fade-in">
-      <div class="stats-grid">
-        <div class="card stat-box"><h4>Expectancy</h4><p [style.color]="expectancy >= 0 ? '#00c851' : '#ff4444'">{{ expectancy | number:'1.2-2' }} R</p></div>
-        <div class="card stat-box"><h4>Win Rate</h4><p>{{ winRate | number:'1.1-1' }}%</p></div>
-        <div class="card stat-box"><h4>Avg R-Multiple</h4><p>{{ avgR | number:'1.2-2' }}R</p></div>
-        <div class="card stat-box"><h4>Net Profit</h4><p [style.color]="totalNetProfit >= 0 ? '#00c851' : '#ff4444'">${{ totalNetProfit | number:'1.2-2' }}</p></div>
-      </div>
-      <div class="insights-grid">
-        <div class="card insight-card">
-  <h3>Strategy Performance</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Strategy</th>
-        <th>Trades</th>
-        <th>Win Rate</th>
-        <th>Expectancy</th> <th>Profit</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (s of strategyStats; track s.name) {
-        <tr>
-          <td><strong>{{ s.name }}</strong></td>
-          <td>{{ s.count }}</td>
-          <td>{{ s.winRate | number:'1.0-0' }}%</td>
-          <td [style.color]="s.expectancy >= 0 ? '#00c851' : '#ff4444'">
-            {{ s.expectancy | number:'1.2-2' }} R
-          </td>
-          <td [style.color]="s.profit >= 0 ? '#00c851' : '#ff4444'">
-            ${{ s.profit | number:'1.2-2' }}
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-</div>
-        <div class="card insight-card">
-          <h3>Discipline Check (Purple Belt)</h3>
-          <div class="discipline-stats">
-            <div class="disc-item"><span>Purple Belt Win Rate:</span><strong>{{ purpleWinRate | number:'1.1-1' }}%</strong></div>
-            <div class="disc-item"><span>Standard Win Rate:</span><strong>{{ standardWinRate | number:'1.1-1' }}%</strong></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
-
   @if (cryptoSubView === 'backtest') {
     <div class="backtest-layout fade-in">
       <section class="card backtest-form">
-        <h3>New Backtest Record</h3>
-        <div class="form-group"><label>Asset</label><input #bAsset type="text"></div>
-        <div class="form-group"><label>Date</label><input #bDate type="date"></div>
-        <div class="form-group"><label>Entry</label><input #bEntry type="number"></div>
-        <div class="form-group"><label>SL</label><input #bSl type="number"></div>
-        <div class="form-group"><label>Exit</label><input #bExit type="number"></div>
-        <div class="form-group"><label>Chart</label><input type="file" (change)="onFileSelected($event)"></div>
-        <button class="primary-btn" (click)="onSaveBacktest(bAsset, bDate, bEntry, bSl, bExit)">Save Results</button>
+        <h3>New Backtest Entry</h3>
+        <div class="trade-form-grid">
+          <div class="form-group"><label>Asset</label><input #bAsset type="text" placeholder="BTCUSD"></div>
+          <div class="form-group"><label>Date</label><input #bDate type="date"></div>
+          <div class="form-group"><label>Entry</label><input #bEntry type="number"></div>
+          <div class="form-group"><label>SL</label><input #bSl type="number"></div>
+          <div class="form-group"><label>Exit</label><input #bExit type="number"></div>
+          <div class="form-group">
+            <label>Chart</label>
+            <input type="file" (change)="onFileSelected($event)">
+          </div>
+        </div>
+        <button class="primary-btn" style="margin-top: 15px; width: 100%;" 
+                (click)="onSaveBacktest(bAsset, bDate, bEntry, bSl, bExit)">
+          Save Results
+        </button>
       </section>
 
       <section class="card backtest-history">
         <div class="backtest-header">
           <h3>Backtest History ({{ backtests.length }})</h3>
-          <div class="bt-summary-stats">
-            <div class="bt-stat"><span>Expectancy:</span><strong [style.color]="backtestExpectancy >= 0 ? '#00c851' : '#ff4444'">{{ backtestExpectancy | number:'1.2-2' }} R</strong></div>
-            <div class="bt-stat"><span>Win Rate:</span><strong>{{ backtestWinRate | number:'1.0-0' }}%</strong></div>
           </div>
-        </div>
         <table>
-          <thead><tr><th>Asset</th><th>Date</th><th>Direction</th><th>Returns</th><th>Result</th><th>Chart</th><th>Actions</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Date</th>
+              <th>Direction</th>
+              <th>Returns</th>
+              <th>Result</th>
+              <th>Chart</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
           <tbody>
             @for (bt of backtests; track bt._id) {
-              <tr><td>{{ bt.asset }}</td><td>{{ bt.date | date:'shortDate' }}</td><td>{{ bt.direction }}</td><td>{{ bt.returns | number:'1.1-2' }}R</td><td>{{ bt.result }}</td><td><img [src]="bt.image" *ngIf="bt.image" class="table-img-preview"></td><td><button (click)="deleteBacktest(bt._id)">🗑️</button></td></tr>
+              <tr>
+                <td>{{ bt.asset }}</td>
+                <td>{{ bt.date | date:'shortDate' }}</td>
+                <td>{{ bt.direction }}</td>
+                <td>{{ bt.returns | number:'1.1-2' }}R</td>
+                <td>{{ bt.result }}</td>
+                <td>
+                  @if (bt.image) {
+                    <button (click)="openChart(bt.image)" class="view-chart-btn">🖼️ Chart</button>
+                  } @else {
+                    <span style="color: #666;">None</span>
+                  }
+                </td>
+                <td><button (click)="deleteBacktest(bt._id)">🗑️</button></td>
+              </tr>
             }
           </tbody>
         </table>

@@ -214,6 +214,18 @@ calculateAdvancedStats() {
     if (confirm('Delete record?')) this.tradeService.deleteBacktest(id).subscribe(() => this.loadBacktests());
   }
 
+  // Add this method inside your CryptoHubComponent class
+openChart(base64String: string) {
+  const newTab = window.open();
+  if (newTab) {
+    newTab.document.body.innerHTML = `
+      <body style="margin:0; background: #1a1a1a; display: flex; align-items: center; justify-content: center;">
+        <img src="${base64String}" style="max-width: 100%; height: auto; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+      </body>`;
+    newTab.document.title = "Backtest Chart View";
+  }
+}
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
