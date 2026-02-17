@@ -5,6 +5,7 @@
       <button [class.active-tab]="incomeSubView === 'expenses'" (click)="incomeSubView = 'expenses'">Expenses</button>
       <button [class.active-tab]="incomeSubView === 'income'" (click)="incomeSubView = 'income'">Income</button>
       <button [class.active-tab]="incomeSubView === 'transactions'" (click)="incomeSubView = 'transactions'">Transactions</button>
+      <button [class.active-tab]="incomeSubView === 'autoearn'" (click)="incomeSubView = 'autoearn'">AutoEarn</button>
       <button [class.active-tab]="incomeSubView === 'stats'" (click)="incomeSubView = 'stats'">Statistics</button>
     </div>
     <p class="subtitle">Manage and track your bank transactions</p>
@@ -177,6 +178,65 @@
         </tbody>
       </table>
     </section>
+  }
+
+@if (incomeSubView === 'autoearn') {
+    <div class="autoearn-view fade-in">
+      
+      <div class="card" style="background: linear-gradient(45deg, #1a1a1a, #004085); margin-bottom: 20px;">
+        <label style="color: #ccc; font-size: 0.9rem;">Total Earned This Year</label>
+        <h2 style="font-size: 2.5rem; margin: 10px 0; color: white;">${{ yearlyTotal | number:'1.2-2' }}</h2>
+      </div>
+
+      <section class="card">
+        <h3>Log Earnings</h3>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <input type="text" #monthLabel placeholder="Label (e.g. Jan Total)" style="flex: 1; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 4px;">
+          <input type="number" #amountVal placeholder="Amount $" style="flex: 1; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 4px;">
+          <button class="primary-btn" (click)="onAddTotal(monthLabel.value, amountVal.value); monthLabel.value=''; amountVal.value=''">Save Entry</button>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 20px;">
+        <h3>Earnings History</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+          <thead>
+            <tr style="text-align: left; color: #888; font-size: 0.8rem; border-bottom: 1px solid #333;">
+              <th style="padding: 10px;">Description</th>
+              <th style="text-align: right;">Amount</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of allEarnings; track item._id) {
+  <tr style="border-bottom: 1px solid #1a1a1a;">
+    @if (editingId === item._id) {
+      <td style="padding: 10px;">
+        <input type="text" #editLabel [value]="item.platform" style="width: 90%; padding: 8px; background: #000; border: 1px solid #444; color: white;">
+      </td>
+      <td style="text-align: right; padding: 10px;">
+        <input type="number" #editAmount [value]="item.amount" style="width: 100px; padding: 8px; background: #000; border: 1px solid #444; color: white;">
+      </td>
+      <td style="text-align: right;">
+        <button (click)="saveEdit(item, editLabel.value, editAmount.value)" style="color: #28a745; background: none; border: none; cursor: pointer; margin-right: 10px;">Save</button>
+        <button (click)="cancelEdit()" style="color: #888; background: none; border: none; cursor: pointer;">Cancel</button>
+      </td>
+    } @else {
+      <td style="padding: 15px; color: #eee;">{{ item.platform }}</td>
+      <td style="text-align: right; color: #28a745; font-weight: bold; font-size: 1.1rem;">
+        +${{ item.amount | number:'1.2-2' }}
+      </td>
+      <td style="text-align: right;">
+        <button (click)="startEdit(item)" style="background: none; border: none; color: #007bff; cursor: pointer; margin-right: 10px;">Edit</button>
+        <button (click)="deleteAutoEarnEvent.emit(item._id)" style="background: none; border: none; color: #666; cursor: pointer;">Remove</button>
+      </td>
+    }
+  </tr>
+}
+          </tbody>
+        </table>
+      </section>
+    </div>
   }
 
   @if (incomeSubView === 'stats') {

@@ -6,14 +6,14 @@ import { environment } from '../../environments/environment';
 export class ProjectService {
   private http = inject(HttpClient);
 
-  private getHeaders() {
-    return {
-      headers: {
-        'current-user': localStorage.getItem('currentUser') || '',
-        'user-role': localStorage.getItem('userRole') || 'User'
-      }
-    };
-  }
+private getHeaders() {
+  return {
+    headers: {
+      'current-user': localStorage.getItem('currentUser') || '',
+      'user-role': localStorage.getItem('userRole') || 'User' // Ensure this matches backend 'user-role'
+    }
+  };
+}
 
   getProjects() {
     return this.http.get<any[]>(`${environment.apiUrl}/projects`, this.getHeaders());
@@ -21,18 +21,18 @@ export class ProjectService {
 
   addProject(title: string, description: string) {
     const createdBy = localStorage.getItem('currentUser') || 'Unknown';
-    return this.http.post(`${environment.apiUrl}/projects`, { title, description, createdBy });
+    return this.http.post(`${environment.apiUrl}/projects`, this.getHeaders());
   }
 
   updateStatus(id: string) {
-    return this.http.put(`${environment.apiUrl}/projects/${id}/status`, {});
+    return this.http.put(`${environment.apiUrl}/projects`, this.getHeaders());
   }
 
   addTask(projectId: string, text: string) {
-    return this.http.post(`${environment.apiUrl}/projects/${projectId}/tasks`, { text });
+    return this.http.post(`${environment.apiUrl}/projects`, this.getHeaders());
   }
 
   deleteProject(id: string) {
-    return this.http.delete(`${environment.apiUrl}/projects/${id}`);
+    return this.http.delete(`${environment.apiUrl}/projects`, this.getHeaders());
   }
 }

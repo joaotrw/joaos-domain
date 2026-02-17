@@ -25,19 +25,18 @@ export class TradeService {
   return this.http.get<any[]>(`${environment.apiUrl}/trades`, headers);
 }
 
+// Change these methods in trade.service.ts
 logTrade(tradeData: any): Observable<any> {
-  console.log('DEBUG [9]: Service calling POST /api/trades with data:', tradeData);
-  return this.http.post(`${environment.apiUrl}/trades`, tradeData);
+  return this.http.post(`${environment.apiUrl}/trades`, tradeData, this.getAuthHeaders());
 }
 
-  // --- BACKTEST API METHODS ---
-  getBacktests(username: string): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.apiUrl}/backtests/${username}`);
-  }
+getBacktests(username: string): Observable<any[]> {
+  return this.http.get<any[]>(`${environment.apiUrl}/backtests/${username}`, this.getAuthHeaders());
+}
 
-  saveBacktest(data: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/backtests`, data);
-  }
+saveBacktest(data: any): Observable<any> {
+  return this.http.post(`${environment.apiUrl}/backtests`, data, this.getAuthHeaders());
+}
 
   deleteBacktest(id: string): Observable<any> {
     return this.http.delete(`${environment.apiUrl}/backtests/${id}`);

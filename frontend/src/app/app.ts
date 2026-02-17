@@ -14,6 +14,7 @@ import { FinanceService } from './services/finance.service';
 import { ProjectService } from './services/project.service';
 import { TradeService } from './services/trade.service';
 import { TaskService } from './services/task.service'; // NEW SERVICE
+import { AutoEarnService } from './services/auto-earn.service';
 
 @Component({
   selector: 'app-root',
@@ -33,12 +34,16 @@ export class AppComponent implements OnInit {
   private project = inject(ProjectService);
   private trade = inject(TradeService);
   private task = inject(TaskService); // NEW: Inject Task Service
+  private autoEarn = inject(AutoEarnService);
 
   // 2. UI State
-  isLoggedIn = false;
+isLoggedIn = false;
   isRegisterMode = false;
-  currentView: 'home' | 'crypto' | 'finance' | 'tasks' = 'home'; // UPDATED TYPE
-  userRole = 'User';
+  currentView: 'home' | 'crypto' | 'finance' | 'tasks' = 'home';
+  
+  // ADD THIS LINE BELOW
+  userRole: string = 'User'; 
+  
   currentUsername: string = '';
   
   // 3. Data Arrays
@@ -48,6 +53,7 @@ export class AppComponent implements OnInit {
   allFinance: any[] = [];
   allIncome: any[] = [];
   goals: any[] = [];
+  allEarnings: any[] = [];
 
   @ViewChild('financeRef') financeComponent!: FinanceManagerComponent;
 
@@ -71,14 +77,15 @@ export class AppComponent implements OnInit {
     this.finance.getFinance().subscribe(res => this.allFinance = res);
     this.finance.getIncome().subscribe(res => this.allIncome = res);
     this.finance.getGoals().subscribe(res => this.goals = res);
-  }
+// Add (res: any) to tell TypeScript to stop complaining about the type
+this.autoEarn.getEarnings().subscribe((res: any) => this.allEarnings = res); }
 
   // --- VIEW NAVIGATION ---
-  setView(view: 'home' | 'crypto' | 'finance' | 'tasks') {
-    this.currentView = view;
-    localStorage.setItem('activeTab', view);
-    this.syncData();
-  }
+setView(view: 'home' | 'crypto' | 'finance' | 'tasks') {
+  this.currentView = view;
+  localStorage.setItem('activeTab', view);
+  this.syncData();
+}
 
   // --- STANDALONE TASK ACTIONS ---
   addGlobalTask(text: string) {
@@ -164,6 +171,20 @@ addIncome(data: any) {
   addGoal(data: any) { this.finance.addGoal(data).subscribe(() => this.syncData()); }
   updateGoal(data: any) { this.finance.updateGoalProgress(data.id, data.amount).subscribe(() => this.syncData()); }
   deleteGoal(id: string) { this.finance.deleteGoal(id).subscribe(() => this.syncData()); }
+
+  addAutoEarn(data: any) {
+  const payload = { ...data, username: this.currentUsername };
+  this.autoEarn.addEarning(payload).subscribe(() => this.syncData());
+}
+
+deleteAutoEarn(id: string) {
+  this.autoEarn.deleteEarning(id).subscribe(() => this.syncData());
+}
+
+updateAutoEarn(data: any) {
+  // Replace 'autoEarnService' with your actual service name
+  this.autoEarn.updateEarning(data.id, data).subscribe(() => this.syncData());
+}
 
   get totalExpenses() { return this.finance.calculateTotal(this.allFinance); }
   get totalIncome() { return this.finance.calculateTotal(this.allIncome); }

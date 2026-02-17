@@ -65,6 +65,7 @@
             [totalNetBalance]="netBalance"
             [capitalOneBalance]="capOne" 
             [santanderBalance]="santander"
+            [allEarnings]="allEarnings"
             
             (addExpenseEvent)="addFinance($event)" 
             (deleteExpenseEvent)="deleteFinance($event)"
@@ -72,7 +73,10 @@
             (deleteIncomeEvent)="deleteIncome($event)"
             (addGoalEvent)="addGoal($event)"
             (updateGoalEvent)="updateGoal($event)"
-            (deleteGoalEvent)="deleteGoal($event)">
+            (deleteGoalEvent)="deleteGoal($event)"
+            (addAutoEarnEvent)="addAutoEarn($event)"
+            (deleteAutoEarnEvent)="deleteAutoEarn($event)"
+            (updateAutoEarnEvent)="updateAutoEarn($event)"> 
           </app-finance-manager>
         }
       </main>
