@@ -227,6 +227,12 @@
       <section class="card backtest-history">
         <div class="backtest-header">
           <h3>Backtest History ({{ backtests.length }})</h3>
+          <div class="expectancy-badge" 
+         [style.background]="backtestExpectancy >= 0 ? 'rgba(40, 167, 69, 0.1)' : 'rgba(255, 68, 68, 0.1)'"
+         [style.color]="backtestExpectancy >= 0 ? '#28a745' : '#ff4444'"
+         style="padding: 8px 15px; border-radius: 6px; border: 1px solid currentColor; font-weight: bold;">
+      Expectancy: {{ backtestExpectancy | number:'1.2-2' }}R
+    </div>
           </div>
         <table>
           <thead>

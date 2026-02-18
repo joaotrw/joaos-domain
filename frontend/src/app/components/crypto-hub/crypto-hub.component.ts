@@ -52,17 +52,35 @@ export class CryptoHubComponent implements OnInit {
   // Add this to your existing component class
 
   // --- BACKTEST ANALYTICS ---
-  get backtestExpectancy(): number {
-    if (!this.backtests.length) return 0;
-    const totalR = this.backtests.reduce((sum, bt) => sum + (bt.returns || 0), 0);
-    return totalR / this.backtests.length;
-  }
+
 
   get backtestWinRate(): number {
     if (!this.backtests.length) return 0;
     const wins = this.backtests.filter(bt => bt.result === 'Win').length;
     return (wins / this.backtests.length) * 100;
   }
+
+  // Add this inside the CryptoHubComponent class in crypto-hub.component.ts
+get backtestExpectancy() {
+  if (!this.backtests || this.backtests.length === 0) return 0;
+
+  const total = this.backtests.length;
+  const wins = this.backtests.filter(bt => bt.returns > 0);
+  const losses = this.backtests.filter(bt => bt.returns <= 0);
+
+  const winProb = wins.length / total;
+  const lossProb = losses.length / total;
+
+  const avgWinR = wins.length > 0 
+    ? wins.reduce((sum, bt) => sum + (bt.returns || 0), 0) / wins.length 
+    : 0;
+    
+  const avgLossR = losses.length > 0 
+    ? Math.abs(losses.reduce((sum, bt) => sum + (bt.returns || 0), 0) / losses.length) 
+    : 0;
+
+  return (winProb * avgWinR) - (lossProb * avgLossR);
+}
 
   // --- SORTING ---
   toggleDateSort() {
