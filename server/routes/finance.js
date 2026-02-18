@@ -21,17 +21,14 @@ router.get('/', async (req, res) => {
 // POST new entry
 router.post('/', async (req, res) => {
   try {
-    // Ensure the entry is tagged with the user who created it
-    const entryData = {
+    const newFinance = new Finance({
       ...req.body,
-      createdBy: req.headers['current-user'] // Guardrail for data integrity
-    };
-    
-    const newEntry = new Finance(entryData);
-    await newEntry.save();
-    res.json({ success: true, data: newEntry });
+      createdBy: req.headers['current-user']
+    });
+    await newFinance.save();
+    res.json({ success: true });
   } catch (err) {
-    res.status(400).json({ message: "Error saving entry", error: err.message });
+    res.status(400).json({ message: err.message });
   }
 });
 

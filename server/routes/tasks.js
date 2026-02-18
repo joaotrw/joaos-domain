@@ -16,9 +16,23 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const newTask = new Task(req.body);
-  await newTask.save();
-  res.json({ success: true });
+  try {
+    // 1. Get the user from the headers
+    const currentUser = req.headers['current-user'];
+
+    // 2. Create the task object, spreading the body and adding createdBy
+    const newTask = new Task({
+      ...req.body,
+      createdBy: currentUser 
+    });
+
+    // 3. Save it
+    await newTask.save();
+    res.json({ success: true });
+  } catch (err) {
+    // 4. Always use a try/catch so the server doesn't crash on validation errors
+    res.status(400).json({ message: err.message });
+  }
 });
 
 router.patch('/:id', async (req, res) => {

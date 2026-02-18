@@ -141,6 +141,33 @@ export class FinanceManagerComponent {
       .sort((a, b) => b.total - a.total);
   }
 
+  getMonthlySummary() {
+    const summary: any = {};
+    this.allFinance.forEach(f => {
+        const month = new Date(f.date).toLocaleString('default', { month: 'long', year: 'numeric' });
+        if (!summary[month]) summary[month] = { income: 0, expenses: 0 };
+        if (f.type === 'Income') summary[month].income += f.amount;
+        else summary[month].expenses += f.amount;
+    });
+
+    return Object.keys(summary).map(month => {
+        const income = summary[month].income;
+        const expenses = summary[month].expenses;
+        const net = income - expenses;
+        
+        // New calculation: Avoid division by zero if income is 0
+        const percentSaved = income > 0 ? (net / income) * 100 : 0;
+
+        return {
+            month,
+            income,
+            expenses,
+            net,
+            percentSaved: percentSaved.toFixed(1) // Keep one decimal point
+        };
+    });
+}
+
   startEdit(item: any) {
   this.editingId = item._id;
 }

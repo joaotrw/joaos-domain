@@ -13,6 +13,7 @@ import { TradeService } from '../../services/trade.service';
 export class CryptoHubComponent implements OnInit {
   private _allTrades: any[] = [];
   sortOrder: 'asc' | 'desc' = 'desc';
+  monthlyPerformance: any[] = [];
 
   @Input() set allTrades(value: any[]) {
     this._allTrades = value || [];
@@ -48,6 +49,8 @@ export class CryptoHubComponent implements OnInit {
     this.loadBacktests();
   }
 
+  // Add this to your existing component class
+
   // --- BACKTEST ANALYTICS ---
   get backtestExpectancy(): number {
     if (!this.backtests.length) return 0;
@@ -78,27 +81,31 @@ export class CryptoHubComponent implements OnInit {
   // --- CALCULATE ANALYTICS TAB ---
 calculateAdvancedStats() {
   const trades = this.allTrades;
-  if (trades.length === 0) return;
+  if (!trades || trades.length === 0) {
+    this.monthlyPerformance = [];
+    this.strategyStats = [];
+    return;
+  }
 
-  // 1. Global R-Multiple Stats
+  // --- 1. GLOBAL STATS & EXPECTANCY ---
   const totalR = trades.reduce((sum, t) => sum + (t.rMultiple || 0), 0);
   this.avgR = totalR / trades.length;
-    
-  // 2. Define Wins and Losses based on money fields
+
   const wins = trades.filter(t => (t.realisedGains || 0) > 0);
   const losses = trades.filter(t => (t.realisedLoss || 0) > 0);
+  
   const winProb = wins.length / trades.length;
   const lossProb = losses.length / trades.length;
-    
+
   const avgWinR = wins.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (wins.length || 1);
   const avgLossR = Math.abs(losses.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (losses.length || 1));
-    
+
   this.expectancy = (winProb * avgWinR) - (lossProb * avgLossR);
 
-  // 3. Discipline Check (Purple Belt) - Updated to use realisedGains
+  // --- 2. DISCIPLINE CHECK (PURPLE BELT) ---
   const purple = trades.filter(t => t.purpleBelt);
   const standard = trades.filter(t => !t.purpleBelt);
-  
+
   this.purpleWinRate = purple.length 
     ? (purple.filter(t => (t.realisedGains || 0) > 0).length / purple.length) * 100 
     : 0;
@@ -106,18 +113,15 @@ calculateAdvancedStats() {
     ? (standard.filter(t => (t.realisedGains || 0) > 0).length / standard.length) * 100 
     : 0;
 
-  // 4. Strategy Performance with Expectancy
+  // --- 3. STRATEGY PERFORMANCE ---
   const strategies = [...new Set(trades.map(t => t.strategy || 'Uncategorized'))];
   this.strategyStats = strategies.map(name => {
     const sTrades = trades.filter(t => (t.strategy || 'Uncategorized') === name);
     const sWins = sTrades.filter(t => (t.realisedGains || 0) > 0);
     const sLosses = sTrades.filter(t => (t.realisedLoss || 0) > 0);
-    
-    // Strategy specific probabilities
+
     const sWinProb = sWins.length / sTrades.length;
     const sLossProb = sLosses.length / sTrades.length;
-    
-    // Strategy specific average R
     const sAvgWinR = sWins.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (sWins.length || 1);
     const sAvgLossR = Math.abs(sLosses.reduce((sum, t) => sum + (t.rMultiple || 0), 0) / (sLosses.length || 1));
 
@@ -129,6 +133,33 @@ calculateAdvancedStats() {
       profit: sTrades.reduce((sum, t) => sum + (t.realisedGains || 0) - (t.realisedLoss || 0), 0)
     };
   });
+
+  // --- 4. MONTHLY PERFORMANCE BREAKDOWN ---
+  const monthMap: { [key: string]: any } = {};
+
+  trades.forEach(t => {
+    if (!t.date) return;
+    const dateObj = new Date(t.date);
+    const monthName = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+    // Use first of the month for sorting purposes
+    const sortKey = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1).getTime();
+
+    if (!monthMap[monthName]) {
+      monthMap[monthName] = { month: monthName, count: 0, wins: 0, profit: 0, sortKey };
+    }
+
+    const pnl = (t.realisedGains || 0) - (t.realisedLoss || 0);
+    monthMap[monthName].count++;
+    monthMap[monthName].profit += pnl;
+    if (pnl > 0) monthMap[monthName].wins++;
+  });
+
+  this.monthlyPerformance = Object.values(monthMap)
+    .sort((a: any, b: any) => b.sortKey - a.sortKey) // Newest month first
+    .map((m: any) => ({
+      ...m,
+      winRate: (m.wins / m.count) * 100
+    }));
 }
 
   // --- CRUD ACTIONS ---

@@ -247,11 +247,21 @@
       <table>
         <thead>
           <tr>
-            <th>Month</th>
-            <th style="text-align: right;">Spent</th>
-            <th style="text-align: right;">Net</th>
-          </tr>
+        <th>Month</th>
+        <th>Income</th>
+        <th>Expenses</th>
+        <th>Net (Saved)</th>
+        <th>% Saved</th> 
+      </tr>
         </thead>
+        <tbody>
+      <tr *ngFor="let s of getMonthlySummary()">
+        <td>{{ s.month }}</td>
+        <td>{{ s.income | currency }}</td>
+        <td>{{ s.expenses | currency }}</td>
+        <td [style.color]="s.net >= 0 ? 'green' : 'red'">{{ s.net | currency }}</td>
+        <td>{{ s.percentSaved }}%</td> </tr>
+    </tbody>
         <tbody>
           @for (stat of monthlyStats; track stat.month) {
             <tr>
