@@ -243,38 +243,34 @@
   <div class="stats-container fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
     
     <section class="card statistics-card">
-      <h3>Monthly Cash Flow Summary</h3>
-      <table>
-        <thead>
-          <tr>
+  <h3>Monthly Cash Flow Summary</h3>
+  <table>
+    <thead>
+      <tr>
         <th>Month</th>
-        <th>Income</th>
-        <th>Expenses</th>
-        <th>Net (Saved)</th>
-        <th>% Saved</th> 
+        <th style="text-align: right;">Income</th>
+        <th style="text-align: right;">Expenses</th>
+        <th style="text-align: right;">Net (Saved)</th>
+        <th style="text-align: right;">% Saved</th>
       </tr>
-        </thead>
-        <tbody>
-      <tr *ngFor="let s of getMonthlySummary()">
-        <td>{{ s.month }}</td>
-        <td>{{ s.income | currency }}</td>
-        <td>{{ s.expenses | currency }}</td>
-        <td [style.color]="s.net >= 0 ? 'green' : 'red'">{{ s.net | currency }}</td>
-        <td>{{ s.percentSaved }}%</td> </tr>
+    </thead>
+    <tbody>
+      @for (stat of monthlyStats; track stat.month) {
+        <tr>
+          <td>{{ stat.month }}</td>
+          <td style="text-align: right; color: #28a745;">${{ stat.earned | number:'1.2-2' }}</td>
+          <td style="text-align: right; color: #ff4444;">-${{ stat.spent | number:'1.2-2' }}</td>
+          <td style="text-align: right;" [style.color]="stat.net >= 0 ? '#28a745' : '#ff4444'">
+            ${{ stat.net | number:'1.2-2' }}
+          </td>
+          <td style="text-align: right; font-weight: bold;">
+            {{ stat.percentSaved }}%
+          </td>
+        </tr>
+      }
     </tbody>
-        <tbody>
-          @for (stat of monthlyStats; track stat.month) {
-            <tr>
-              <td>{{ stat.month }}</td>
-              <td style="text-align: right; color: #ff4444;">-${{ stat.spent | number:'1.2-2' }}</td>
-              <td style="text-align: right;" [style.color]="(stat.earned - stat.spent) >= 0 ? '#28a745' : '#ff4444'">
-                ${{ (stat.earned - stat.spent) | number:'1.2-2' }}
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </section>
+  </table>
+</section>
 
     <section class="card statistics-card">
       <h3>Spending by Category</h3>

@@ -100,27 +100,45 @@ export class FinanceManagerComponent {
     return [...expenses, ...income].sort((a, b) => b.sortDate - a.sortDate);
   }
 
-  get monthlyStats() {
-    const stats: { [key: string]: { month: string, spent: number, earned: number } } = {};
+get monthlyStats() {
+  const stats: { [key: string]: { month: string, spent: number, earned: number } } = {};
 
-    (this.allFinance || []).forEach(item => {
-      const date = new Date(item.date);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-      const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-      if (!stats[key]) stats[key] = { month: monthName, spent: 0, earned: 0 };
-      stats[key].spent += Number(item.amount) || 0;
+  // 1. Process Expenses (allFinance)
+  (this.allFinance || []).forEach(item => {
+    const date = new Date(item.date);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    
+    if (!stats[key]) stats[key] = { month: monthName, spent: 0, earned: 0 };
+    stats[key].spent += Number(item.amount) || 0;
+  });
+
+  // 2. Process Income (allIncome) - ADDED TO THE SAME KEY
+  (this.allIncome || []).forEach(item => {
+    const date = new Date(item.date);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    
+    if (!stats[key]) stats[key] = { month: monthName, spent: 0, earned: 0 };
+    stats[key].earned += Number(item.amount) || 0;
+  });
+
+  // 3. Return combined array and calculate the percentage
+  return Object.values(stats)
+    .sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime())
+    .map(stat => {
+      const net = stat.earned - stat.spent;
+      // If income is 0 and you have expenses, savings is 0%. 
+      // Otherwise: (Net / Income) * 100
+      const percentSaved = stat.earned > 0 ? (net / stat.earned) * 100 : 0;
+      
+      return {
+        ...stat,
+        net: net,
+        percentSaved: percentSaved > 0 ? percentSaved.toFixed(1) : '0.0'
+      };
     });
-
-    (this.allIncome || []).forEach(item => {
-      const date = new Date(item.date);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-      const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-      if (!stats[key]) stats[key] = { month: monthName, spent: 0, earned: 0 };
-      stats[key].earned += Number(item.amount) || 0;
-    });
-
-    return Object.values(stats).sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime());
-  }
+}
 
   get categoryStats() {
     const categories: { [key: string]: number } = {
