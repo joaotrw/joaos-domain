@@ -15,6 +15,7 @@
           <li [class.active]="currentView === 'tasks'" (click)="setView('tasks')">Task Tracker</li>
           <li [class.active]="currentView === 'crypto'" (click)="setView('crypto')">Crypto</li>
           <li [class.active]="currentView === 'finance'" (click)="setView('finance')">Finance</li>
+          <li [class.active]="currentView === 'business'" (click)="setView('business')">Business Model</li>
           <li (click)="logout()" class="logout-link">Logout</li>
         </ul>
       </nav>
@@ -79,6 +80,109 @@
             (updateAutoEarnEvent)="updateAutoEarn($event)"> 
           </app-finance-manager>
         }
+
+        @if (currentView === 'business') {
+  <div class="business-container fade-in">
+    <header>
+      <h1>🕸️ My Business Model</h1>
+      <p class="subtitle">System 1 & 3: Strategic Capital Flow & Risk Management</p>
+    </header>
+
+    <div class="flow-wrapper">
+      <div class="node-row">
+        <div class="node start-node">
+          <div class="node-label">Income</div>
+          <h4>Job Cash Flow</h4>
+        </div>
+      </div>
+
+      <div class="connector">↓</div>
+
+      <div class="node-row">
+        <div class="node">
+          <h4>Checking Account</h4>
+          <p>Bills & Essentials</p>
+        </div>
+      </div>
+
+      <div class="connector">↓</div>
+
+      <div class="node-row">
+        <div class="node decision-node">
+          <h4>Leftover Cash?</h4>
+        </div>
+      </div>
+
+      <div class="connector-split">
+        <div class="line-left"></div>
+        <div class="line-right"></div>
+      </div>
+
+      <div class="systems-container">
+        <div class="system-column">
+          <div class="system-header">System 3: Strategic Side Growth</div>
+          <div class="node">
+            <h4>MM Side Account</h4>
+          </div>
+          <div class="connector">↓</div>
+          <div class="node">
+            <h4>Manual Trades</h4>
+            <p>No Leverage</p>
+          </div>
+          <div class="connector">↓</div>
+          <div class="node decision-node profit">
+            <h4>Profit?</h4>
+          </div>
+        </div>
+
+        <div class="system-column belt-core">
+          <div class="system-header">System 1: Purple Belt Core</div>
+          <div class="node">
+            <h4>Main Capital</h4>
+          </div>
+          <div class="connector">↓</div>
+          <div class="node">
+            <h4>1% Risk System</h4>
+            <p>w/ Leverage</p>
+          </div>
+          <div class="connector">↓</div>
+          <div class="node decision-node profit">
+            <h4>Profit?</h4>
+          </div>
+        </div>
+      </div>
+
+      <div class="connector">↓</div>
+
+      <div class="node-row">
+        <div class="node decision-node">
+          <h4>Gas < $200?</h4>
+        </div>
+      </div>
+
+      <div class="connector">↓</div>
+
+      <div class="node-row multi">
+        <div class="node">
+          <h4>Refill Gas</h4>
+        </div>
+        <div class="node asset-node">
+          <h4>Convert to BTC</h4>
+        </div>
+      </div>
+
+      <div class="connector">↓</div>
+
+      <div class="node-row">
+        <div class="node vault-node">
+          <span class="vault-icon">🔒</span>
+          <h4>COLD WALLET</h4>
+          <p>Long Term Holding</p>
+        </div>
+      </div>
+    </div>
+  </div>
+}
       </main>
     </div>
   }

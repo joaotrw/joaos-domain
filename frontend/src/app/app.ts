@@ -39,7 +39,7 @@ export class AppComponent implements OnInit {
   // 2. UI State
 isLoggedIn = false;
   isRegisterMode = false;
-  currentView: 'home' | 'crypto' | 'finance' | 'tasks' = 'home';
+  currentView: 'home' | 'crypto' | 'finance' | 'tasks' | 'business' = 'home';
   
   // ADD THIS LINE BELOW
   userRole: string = 'User'; 
@@ -81,8 +81,8 @@ isLoggedIn = false;
 this.autoEarn.getEarnings().subscribe((res: any) => this.allEarnings = res); }
 
   // --- VIEW NAVIGATION ---
-setView(view: 'home' | 'crypto' | 'finance' | 'tasks') {
-  this.currentView = view;
+setView(view: 'home' | 'crypto' | 'finance' | 'tasks' | 'business') {
+    this.currentView = view;
   localStorage.setItem('activeTab', view);
   this.syncData();
 }
