@@ -165,8 +165,8 @@
       </div>
       <div class="card" style="margin-top: 20px;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-    <h3 style="color: #2196f3; margin: 0;">Monthly Performance</h3>
-    <span style="font-size: 0.8rem; color: #888;">Track your progress over time</span>
+    <h3 style="color: #2196f3; margin: 0;">Monthly System Breakdown</h3>
+    <span style="font-size: 0.8rem; color: #888;">Performance per strategy per month</span>
   </div>
 
   <div class="table-container">
@@ -174,20 +174,26 @@
       <thead>
         <tr>
           <th>Month</th>
-          <th class="text-center">Total Trades</th>
+          <th>System/Strategy</th>
+          <th class="text-center">Trades</th>
           <th class="text-center">Win Rate</th>
+          <th class="text-center">Avg. R</th>
           <th class="text-right">Net P&L</th>
         </tr>
       </thead>
       <tbody>
-        @for (m of monthlyPerformance; track m.month) {
+        @for (m of monthlyPerformance; track (m.month + m.strategy)) {
           <tr>
-            <td><strong>{{ m.month }}</strong></td>
+            <td style="color: #888;">{{ m.month }}</td>
+            <td><strong style="color: #fff;">{{ m.strategy }}</strong></td>
             <td class="text-center">{{ m.count }}</td>
             <td class="text-center">
                <span [style.color]="m.winRate >= 50 ? '#28a745' : '#ff4444'">
                  {{ m.winRate | number:'1.0-0' }}%
                </span>
+            </td>
+            <td class="text-center" [style.color]="m.expectancy >= 0 ? '#28a745' : '#ff4444'">
+              {{ m.expectancy | number:'1.2-2' }}R
             </td>
             <td class="text-right" [style.color]="m.profit >= 0 ? '#28a745' : '#ff4444'">
               {{ m.profit >= 0 ? '+' : '' }}{{ m.profit | currency }}

@@ -152,32 +152,66 @@ calculateAdvancedStats() {
     };
   });
 
-  // --- 4. MONTHLY PERFORMANCE BREAKDOWN ---
-  const monthMap: { [key: string]: any } = {};
+// --- 4. MONTHLY PERFORMANCE PER SYSTEM ---
+const monthSystemMap: { [key: string]: any } = {};
 
-  trades.forEach(t => {
-    if (!t.date) return;
-    const dateObj = new Date(t.date);
-    const monthName = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
-    // Use first of the month for sorting purposes
-    const sortKey = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1).getTime();
+trades.forEach(t => {
+  if (!t.date) return;
+  const dateObj = new Date(t.date);
+  const monthName = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+  const strategyName = t.strategy || 'Uncategorized';
+  
+  // Create a unique key for the combination of Month + Strategy
+  const comboKey = `${monthName}-${strategyName}`;
+  const sortKey = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1).getTime();
 
-    if (!monthMap[monthName]) {
-      monthMap[monthName] = { month: monthName, count: 0, wins: 0, profit: 0, sortKey };
-    }
+  if (!monthSystemMap[comboKey]) {
+    monthSystemMap[comboKey] = { 
+      month: monthName, 
+      strategy: strategyName,
+      count: 0, 
+      wins: 0, 
+      losses: 0,
+      totalR: 0,
+      profit: 0, 
+      sortKey 
+    };
+  }
 
-    const pnl = (t.realisedGains || 0) - (t.realisedLoss || 0);
-    monthMap[monthName].count++;
-    monthMap[monthName].profit += pnl;
-    if (pnl > 0) monthMap[monthName].wins++;
-  });
+  const pnl = (t.realisedGains || 0) - (t.realisedLoss || 0);
+  const rMult = t.rMultiple || 0;
 
-  this.monthlyPerformance = Object.values(monthMap)
-    .sort((a: any, b: any) => b.sortKey - a.sortKey) // Newest month first
-    .map((m: any) => ({
+  monthSystemMap[comboKey].count++;
+  monthSystemMap[comboKey].profit += pnl;
+  monthSystemMap[comboKey].totalR += rMult;
+
+  if (pnl > 0) {
+    monthSystemMap[comboKey].wins++;
+  } else if (pnl < 0) {
+    monthSystemMap[comboKey].losses++;
+  }
+});
+
+this.monthlyPerformance = Object.values(monthSystemMap)
+  .sort((a: any, b: any) => {
+    // Sort by date first (newest), then alphabetically by strategy
+    if (b.sortKey !== a.sortKey) return b.sortKey - a.sortKey;
+    return a.strategy.localeCompare(b.strategy);
+  })
+  .map((m: any) => {
+    const winProb = m.wins / m.count;
+    const lossProb = m.losses / m.count;
+    
+    // Simple expectancy for the month/system combo
+    // (Profit / Count) gives a rough expectancy, but here we use R-multiple average
+    const monthExpectancy = m.count > 0 ? m.totalR / m.count : 0;
+
+    return {
       ...m,
-      winRate: (m.wins / m.count) * 100
-    }));
+      winRate: (m.wins / m.count) * 100,
+      expectancy: monthExpectancy
+    };
+  });
 }
 
   // --- CRUD ACTIONS ---
