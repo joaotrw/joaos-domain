@@ -32,7 +32,7 @@ export class CryptoHubComponent implements OnInit {
   @Output() tradeDeletedEvent = new EventEmitter<string>();
 
   backtests: any[] = [];
-  cryptoSubView: 'log' | 'stats' | 'backtest' = 'log';
+  cryptoSubView: 'log' | 'stats' | 'backtest' | 'market' = 'log';
   selectedFileBase64: string | null = null;
   editingTradeId: string | null = null;
 
@@ -42,11 +42,19 @@ export class CryptoHubComponent implements OnInit {
   purpleWinRate: number = 0;
   standardWinRate: number = 0;
   strategyStats: any[] = [];
+  thoughts: any[] = [];
+newThought = {
+  title: '',
+  content: '',
+  sentiment: 'Neutral'
+};
+  
 
   constructor(private tradeService: TradeService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.loadBacktests();
+    this.loadThoughts();
   }
 
   // Add this to your existing component class
@@ -330,4 +338,39 @@ openChart(base64String: string) {
     if (r < -0.1) return 'Loss';
     return 'Breakeven';
   }
+
+// crypto-hub.component.ts
+
+// 1. Add this to your ngOnInit or a specific load trigger
+loadThoughts() {
+  if (!this.currentUser) return;
+  this.tradeService.getThoughts(this.currentUser).subscribe(data => {
+    this.thoughts = data;
+  });
+}
+
+// 2. Add the Save Method
+saveMarketThought() {
+  if (!this.newThought.content) return;
+
+  const payload = {
+    ...this.newThought,
+    createdBy: this.currentUser,
+    date: new Date()
+  };
+
+  this.tradeService.saveThought(payload).subscribe(() => {
+    this.loadThoughts(); // Refresh the list
+    this.newThought = { title: '', content: '', sentiment: 'Neutral' }; // Reset form
+  });
+}
+
+// 3. Add the Delete Method
+deleteThought(id: string) {
+  if (confirm('Delete this thought?')) {
+    this.tradeService.deleteThought(id).subscribe(() => this.loadThoughts());
+  }
+}
+
+
 }

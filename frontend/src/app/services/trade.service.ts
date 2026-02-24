@@ -76,6 +76,19 @@ saveBacktest(data: any): Observable<any> {
   return this.http.patch(`${environment.apiUrl}/trades/${id}`, data);
 }
 
+getThoughts(username: string): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/thoughts/${username}`, this.getAuthHeaders());
+  }
+
+  saveThought(data: any): Observable<any> {
+    // data should include { title, content, sentiment, createdBy }
+    return this.http.post(`${environment.apiUrl}/thoughts`, data, this.getAuthHeaders());
+  }
+
+  deleteThought(id: string): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/thoughts/${id}`, this.getAuthHeaders());
+  }
+
 
 
 

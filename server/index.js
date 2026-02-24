@@ -27,6 +27,7 @@ const projectRoutes = require('./routes/projects');
 const goalRoutes = require('./routes/goals');
 const autoEarnRoutes = require('./routes/autoearn');
 const backtestRoutes = require('./routes/backtest'); // FIXED: Removed 's' to match your file backtest.js
+const thoughtRoutes = require('./routes/thoughts');
 
 app.use('/api', authRoutes);
 app.use('/api/finance', financeRoutes);
@@ -37,6 +38,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/autoearn', autoEarnRoutes);
 app.use('/api/backtests', backtestRoutes);
+app.use('/api/thoughts', thoughtRoutes);
 
 // Health Check
 app.get('/api/welcome', (req, res) => {
